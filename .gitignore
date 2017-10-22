@@ -1,0 +1,24 @@
+syntax: glob
+
+dist
+build
+doc/_build
+
+.installed.cfg
+*.egg-info
+*.swp
+*.pyc
+*.pyo
+*\#
+*.\#*
+*~
+*.orig
+*.DS_Store
+
+parts/
+bin/
+etc/
+develop-eggs/
+
+gmon.out
+

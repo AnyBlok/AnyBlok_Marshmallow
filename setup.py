@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# This file is a part of the AnyBlok / Marshmallow api project
+#
+#    Copyright (C) 2017 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+#
+# This Source Code Form is subject to the terms of the Mozilla Public License,
+# v. 2.0. If a copy of the MPL was not distributed with this file,You can
+# obtain one at http://mozilla.org/MPL/2.0/.
+
+from setuptools import setup, find_packages
+from os.path import abspath, dirname, join
+
+
+here = abspath(dirname(__file__))
+
+with open(join(here, 'README.rst'), 'r',
+          encoding='utf-8') as readme:
+    README = readme.read()
+
+# with open(
+#     os.path.join(here, 'doc', 'CHANGES.rst'), 'r', encoding='utf-8'
+# ) as change:
+#     CHANGE = change.read()
+#
+# with open(
+#     os.path.join(here, 'doc', 'FRONT.rst'), 'r', encoding='utf-8'
+# ) as front:
+#     FRONT = front.read()
+
+
+requirements = [
+    'anyblok',
+    'marshmallow',
+    'marshmallow-sqlalchemy',
+]
+
+setup(
+    name='anyblok_marshmallow',
+    version='0.1.0',
+    description="Add validator, serializer and deserializer to AnyBlok",
+    long_description=README + '\n',  # + FRONT + '\n' + CHANGE,
+    author="Jean-Sébastien SUZANNE",
+    author_email='jssuzanne@anybox.fr',
+    url='https://AnyBlok_Marshmallow.readthedocs.org',
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=requirements,
+    zip_safe=False,
+    keywords='anyblok_marshmallow',
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
+    ],
+)
