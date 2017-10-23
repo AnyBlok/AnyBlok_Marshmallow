@@ -18,15 +18,15 @@ with open(join(here, 'README.rst'), 'r',
           encoding='utf-8') as readme:
     README = readme.read()
 
-# with open(
-#     os.path.join(here, 'doc', 'CHANGES.rst'), 'r', encoding='utf-8'
-# ) as change:
-#     CHANGE = change.read()
-#
-# with open(
-#     os.path.join(here, 'doc', 'FRONT.rst'), 'r', encoding='utf-8'
-# ) as front:
-#     FRONT = front.read()
+with open(
+    join(here, 'doc', 'CHANGES.rst'), 'r', encoding='utf-8'
+) as change:
+    CHANGE = change.read()
+
+with open(
+    join(here, 'doc', 'FRONT.rst'), 'r', encoding='utf-8'
+) as front:
+    FRONT = front.read()
 
 
 requirements = [
@@ -39,7 +39,7 @@ setup(
     name='anyblok_marshmallow',
     version='0.1.0',
     description="Add validator, serializer and deserializer to AnyBlok",
-    long_description=README + '\n',  # + FRONT + '\n' + CHANGE,
+    long_description=README + '\n' + FRONT + '\n' + CHANGE,
     author="Jean-Sébastien SUZANNE",
     author_email='jssuzanne@anybox.fr',
     url='https://AnyBlok_Marshmallow.readthedocs.org',
