@@ -202,6 +202,16 @@ This is the solution given in the main exemple::
             registry = registry
 
 
+Add the **registry** during init
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This solution is use during the instanciation
+
+::
+
+    customer_schema = CustomerSchema(registry=registry)
+
+
 Add the **registry** by the context
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
