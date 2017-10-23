@@ -41,7 +41,7 @@ env:
 script:
   - flake8 anyblok_multi_engines
   - psql -c 'create database travis_ci_test;' -U postgres
-  - nosetests anyblok_multi_engines/tests -v -s --with-coverage --cover-package=anyblok_multi_engines
+  - nosetests anyblok_marshmallow/tests -v -s --with-coverage --cover-package=anyblok_marshmallow
   
 after_success:
   coveralls
