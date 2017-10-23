@@ -6,28 +6,10 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
-from anyblok.column import Integer, String
-from anyblok_marshmallow import ModelSchema
+from . import add_simple_model, ExempleSchema
 
 
-def add_simple_model():
-
-    from anyblok import Declarations
-
-    @Declarations.register(Declarations.Model)
-    class Exemple:
-        id = Integer(primary_key=True)
-        name = String(nullable=False)
-        number = Integer()
-
-
-class ExempleSchema(ModelSchema):
-
-    class Meta:
-        model = 'Model.Exemple'
-
-
-class TestMarshmallow(DBTestCase):
+class TestSimpleModel(DBTestCase):
 
     def test_dump_simple_schema(self):
         registry = self.init_registry(add_simple_model)
