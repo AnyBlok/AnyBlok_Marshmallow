@@ -13,6 +13,12 @@ Code
 
 .. automodule:: anyblok_marshmallow.schema
 
+**update_from_kwargs**
+----------------------
+
+.. autofunction:: update_from_kwargs
+    :noindex:
+
 **format_field**
 ----------------
 

@@ -14,6 +14,35 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 
 
+def update_from_kwargs(*entries):
+    """decorator to get temporaly the value in kwargs and put it in schema
+
+    :params entries: array ok entry name to take from the kwargs
+    """
+
+    def wrap_function(f):
+
+        def wrap_call(*args, **kwargs):
+            instance = args[0]
+            old_vals = []
+            for entry in entries:
+                if hasattr(instance, entry):
+                    old_vals.append((entry, getattr(instance, entry)))
+
+                if entry in kwargs:
+                    setattr(instance, entry, kwargs.pop(entry))
+
+            res = f(*args, **kwargs)
+            for entry, value in old_vals:
+                setattr(instance, entry, value)
+
+            return res
+
+        return wrap_call
+
+    return wrap_function
+
+
 def format_fields(x):
     """remove the anyblok prefix form the field name"""
     if x.startswith(anyblok_column_prefix):
@@ -109,14 +138,17 @@ class ModelSchema(Schema):
 
         return self._schema
 
+    @update_from_kwargs('registry', 'post_load_return_instance')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
 
+    @update_from_kwargs('registry')
     def dump(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
+    @update_from_kwargs('registry')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)
