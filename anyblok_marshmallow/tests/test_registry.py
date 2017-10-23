@@ -288,6 +288,7 @@ class TestRegistry(DBTestCase):
 
     def test_dump_registry_from_meta(self):
         registry = self.init_registry(add_complexe_model)
+        self.registry = registry
 
         class CustomerSchema(ModelSchema):
 
@@ -297,7 +298,7 @@ class TestRegistry(DBTestCase):
 
             class Meta:
                 model = 'Model.Customer'
-                registry = registry
+                registry = self.registry
 
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
@@ -335,6 +336,7 @@ class TestRegistry(DBTestCase):
 
     def test_load_registry_from_meta(self):
         registry = self.init_registry(add_complexe_model)
+        self.registry = registry
 
         class CustomerSchema(ModelSchema):
 
@@ -344,7 +346,7 @@ class TestRegistry(DBTestCase):
 
             class Meta:
                 model = 'Model.Customer'
-                registry = registry
+                registry = self.registry
 
         dump_data = {
             'id': 1,
@@ -374,6 +376,7 @@ class TestRegistry(DBTestCase):
 
     def test_validate_registry_from_meta(self):
         registry = self.init_registry(add_complexe_model)
+        self.registry = registry
 
         class CustomerSchema(ModelSchema):
 
@@ -383,7 +386,7 @@ class TestRegistry(DBTestCase):
 
             class Meta:
                 model = 'Model.Customer'
-                registry = registry
+                registry = self.registry
 
         dump_data = {
             'id': 1,

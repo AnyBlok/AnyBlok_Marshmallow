@@ -10,3 +10,38 @@
 
 Code
 ====
+
+.. automodule:: anyblok_marshmallow.schema
+
+**format_field**
+----------------
+
+.. autofunction:: format_fields
+    :noindex:
+
+**ModelConverter**
+------------------
+
+.. autoclass:: ModelConverter
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+**ModelSchemaOpts**
+-------------------
+
+.. autoclass:: ModelSchemaOpts
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+**ModelSchema**
+---------------
+
+.. autoclass:: ModelSchema
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
