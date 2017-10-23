@@ -211,6 +211,7 @@ This solution is use during the instanciation or after
     customer_schema = CustomerSchema(context={'registry': registry})
 
 or
+
 ::
 
     customer_schema = CustomerSchema()
