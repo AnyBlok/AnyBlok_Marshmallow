@@ -187,7 +187,8 @@ Give the registry
 
 The schema need to have the registry.
 
-If no registry found when the de(serialization) or validation then the **AnyBlokMarshmallowException** is raised
+If no registry found when the de(serialization) or validation then the entry
+**registry** will be added in the errors dict.
 
 Add the **registry** by the Meta
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -226,6 +227,24 @@ Add the **registry** when the de(serialization or validatoris called
     customer_schema.dump(customer, registry=registry)
     customer_schema.load(dump_data, registry=registry)
     customer_schema.validate(dump_data, registry=registry)
+
+
+**post_load_return_instance** option
+------------------------------------
+
+As the registry this option can be passed by initialization of the schema, by the
+context or during the call of methods
+
+The value of this options can be:
+
+* False: **default**, the output is a dict
+* True: the output is an instance of the model. The primary keys must be in value
+* array of string: the output is an instance of the model, each str entry must be an existing column
+
+.. warning::
+
+    if the option is not False, and the instance can no be found, then the **instance** error will be added
+    in the errors dict of the method
 
 
 Overriding Generated Fields
