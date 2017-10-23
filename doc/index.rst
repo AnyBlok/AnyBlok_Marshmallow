@@ -16,13 +16,12 @@ Welcome to Anyblok / Marshmallow's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-    FRONT.rst
-    MEMENTO.rst
-    CODE.rst
-    CHANGE.rst
-    LICENSE.rst
+   FRONT.rst
+   MEMENTO.rst
+   CODE.rst
+   CHANGES.rst
+   LICENSE.rst
 
 
 Indices and tables
