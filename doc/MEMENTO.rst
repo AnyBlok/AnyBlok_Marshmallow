@@ -170,7 +170,7 @@ Declare your schema
     # }
 
     customer_schema.load(dump_data).data
-    # <Customer (name='JS Suzanne' tags=[<Tag (name='tag 1')>, <Tag (name='tag 2')>])>
+    # <Customer(name='JS Suzanne' tags=[<Tag(name='tag 1')>, <Tag (name='tag 2')>])>
 
     errors = customer_schema.validate(dump_data)
     # dict with all the validating errors
@@ -253,8 +253,12 @@ The value of this options can be:
 
 .. warning::
 
-    if the option is not False, and the instance can no be found, then the **instance** error will be added
+    If the option is not False, and the instance can no be found, then the **instance** error will be added
     in the errors dict of the method
+
+.. warning::
+
+    The post load is only for load method!!!
 
 
 Overriding Generated Fields
