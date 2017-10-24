@@ -7,7 +7,7 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model, CustomerSchema, AddressSchema, TagSchema
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import ModelSchema, RegistryNotFound
 from marshmallow import fields
 
 
@@ -412,3 +412,69 @@ class TestRegistry(DBTestCase):
         customer_schema = CustomerSchema()
         errors = customer_schema.validate(dump_data)
         self.assertFalse(errors)
+
+    def test_dump_without_registry(self):
+        registry = self.init_registry(add_complexe_model)
+        customer_schema = CustomerSchema()
+        tag = registry.Tag.insert(name="tag 1")
+        customer = registry.Customer.insert(name="C1")
+        customer.tags.append(tag)
+        city = registry.City.insert(name="Rouen", zipcode="76000")
+        registry.Address.insert(
+            customer=customer, city=city, street="Somewhere")
+        with self.assertRaises(RegistryNotFound):
+            customer_schema.dump(customer)
+
+    def test_load_without_registry(self):
+        self.init_registry(add_complexe_model)
+        dump_data = {
+            'id': 1,
+            'name': 'name',
+            'addresses': [
+                {
+                    'id': 2,
+                    'street': 'street',
+                    'city': {
+                        'id': 3,
+                        'name': 'name',
+                        'zipcode': 'zipcode',
+                    },
+                },
+            ],
+            'tags': [
+                {
+                    'id': 4,
+                    'name': 'name',
+                },
+            ],
+        }
+        customer_schema = CustomerSchema()
+        with self.assertRaises(RegistryNotFound):
+            customer_schema.load(dump_data)
+
+    def test_validate_without_registry(self):
+        self.init_registry(add_complexe_model)
+        dump_data = {
+            'id': 1,
+            'name': 'name',
+            'addresses': [
+                {
+                    'id': 2,
+                    'street': 'street',
+                    'city': {
+                        'id': 3,
+                        'name': 'name',
+                        'zipcode': 'zipcode',
+                    },
+                },
+            ],
+            'tags': [
+                {
+                    'id': 4,
+                    'name': 'name',
+                },
+            ],
+        }
+        customer_schema = CustomerSchema()
+        with self.assertRaises(RegistryNotFound):
+            customer_schema.validate(dump_data)

@@ -187,8 +187,8 @@ Give the registry
 
 The schema need to have the registry.
 
-If no registry found when the de(serialization) or validation then the entry
-**registry** will be added in the errors dict.
+If no registry found when the de(serialization) or validation then the 
+**RegistryNotFound** exception will be raised.
 
 Add the **registry** by the Meta
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

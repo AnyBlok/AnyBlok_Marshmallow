@@ -14,6 +14,11 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 
 
+class RegistryNotFound(Exception):
+    """Exception raised when no registry is found to build schema"""
+    pass
+
+
 def update_from_kwargs(*entries):
     """decorator to get temporaly the value in kwargs and put it in schema
 
@@ -101,7 +106,11 @@ class ModelSchema(Schema):
             post_load_return_instance or self.opts.post_load_return_instance)
 
     def get_registry(self):
-        return self.context.get('registry', self.registry)
+        registry = self.context.get('registry', self.registry)
+        if not registry:
+            raise RegistryNotFound('No registry found to build schema %r' % self)
+
+        return registry
 
     def get_post_load_return_instance(self):
         return self.context.get('post_load_return_instance',

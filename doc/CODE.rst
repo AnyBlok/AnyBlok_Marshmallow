@@ -13,6 +13,18 @@ Code
 
 .. automodule:: anyblok_marshmallow.schema
 
+Exceptions
+----------
+
+**RegistryNotFound**
+~~~~~~~~~~~~~~~~~~~~
+
+.. autoexception:: RegistryNotFound
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
 **update_from_kwargs**
 ----------------------
 
