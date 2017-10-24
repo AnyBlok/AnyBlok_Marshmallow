@@ -21,7 +21,7 @@
 .. image:: https://readthedocs.org/projects/AnyBlok_Marshmallow/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
-    :target: https://AnyBlok_Marshmallow.readthedocs.org/en/latest/?badge=latest
+    :target: https://doc.anyblok-marshmallow.anyblok.org/?badge=latest
 
 
 AnyBlok Marshmallow
@@ -35,4 +35,4 @@ the goal is to give the SQLAlchemy Model build by AnyBlok to this librairy
 
 AnyBlok Marshmallow is released under the terms of the `Mozilla Public License`.
 
-See the `latest documentation <http://doc.anyblok-multi-engines.anyblok.org/>`_
+See the `latest documentation <http://doc.anyblok-marshmallow.anyblok.org/>`_

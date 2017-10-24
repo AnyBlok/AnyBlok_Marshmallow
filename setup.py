@@ -12,11 +12,17 @@ from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
 
+version = "1.0.0"
 here = abspath(dirname(__file__))
 
 with open(join(here, 'README.rst'), 'r',
           encoding='utf-8') as readme:
     README = readme.read()
+
+with open(
+    join(here, 'doc', 'MEMENTO.rst'), 'r', encoding='utf-8'
+) as memento:
+    MEMENTO = memento.read()
 
 with open(
     join(here, 'doc', 'CHANGES.rst'), 'r', encoding='utf-8'
@@ -37,12 +43,12 @@ requirements = [
 
 setup(
     name='anyblok_marshmallow',
-    version='0.1.0',
+    version=version,
     description="Add validator, serializer and deserializer to AnyBlok",
-    long_description=README + '\n' + FRONT + '\n' + CHANGE,
+    long_description=README + '\n' + FRONT + '\n' + MEMENTO + '\n' + CHANGE,
     author="Jean-Sébastien SUZANNE",
     author_email='jssuzanne@anybox.fr',
-    url='https://AnyBlok_Marshmallow.readthedocs.org',
+    url='https://anyblok-marshmallow.readthedocs.io/en/' + version,
     packages=find_packages(),
     include_package_data=True,
     install_requires=requirements,
