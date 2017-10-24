@@ -177,9 +177,10 @@ Declare your schema
 
 
 .. note::
-    By default: the deserialization return a dict with deserialized data, here we get an
-    instance of the model because the ``CustomerSchema`̀` add **post_load_return_instance = True**
-    in their Meta
+
+    By default: the deserialization return a dict with deserialized data, 
+    here we get an instance of the model because the ``CustomerSchema`̀` add 
+    ``post_load_return_instance = True`` in their Meta
 
 
 Give the registry
