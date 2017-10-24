@@ -147,3 +147,72 @@ class TestPostLoad(DBTestCase):
             repr(data),
             "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
+
+    def test_post_load_return_instance_ko(self):
+        registry = self.init_registry(add_complexe_model)
+        customer_schema = CustomerSchema(
+            context={'post_load_return_instance': True})
+        customer_schema.context['registry'] = registry
+
+        customer = self.get_customer(registry)
+        dump_data = customer_schema.dump(customer).data
+        dump_data['id'] += 1
+        data, errors = customer_schema.load(dump_data)
+
+        self.assertEqual(
+            errors,
+            {
+                'instance': (
+                    "No instance of <class 'anyblok.model.customer'> found "
+                    "with the filter keys ['id']"
+                ),
+            }
+        )
+
+    def test_post_load_return_instance_specific_field_ko(self):
+        registry = self.init_registry(add_complexe_model)
+        customer_schema = CustomerSchema(
+            context={'post_load_return_instance': ['id']})
+        customer_schema.context['registry'] = registry
+
+        customer = self.get_customer(registry)
+        dump_data = customer_schema.dump(customer).data
+        dump_data['id'] += 1
+        data, errors = customer_schema.load(dump_data)
+
+        self.assertEqual(
+            errors,
+            {
+                'instance': (
+                    "No instance of <class 'anyblok.model.customer'> found "
+                    "with the filter keys ['id']"
+                ),
+            }
+        )
+
+    def test_post_load_return_instance_specific_field_ko_2(self):
+        registry = self.init_registry(add_complexe_model)
+
+        class CustomerSchema(ModelSchema):
+
+            class Meta:
+                model = 'Model.Customer'
+
+        customer_schema = CustomerSchema(
+            context={'post_load_return_instance': ['name']})
+        customer_schema.context['registry'] = registry
+
+        self.get_customer(registry)
+        customer = self.get_customer(registry)
+        dump_data = customer_schema.dump(customer).data
+        data, errors = customer_schema.load(dump_data)
+
+        self.assertEqual(
+            errors,
+            {
+                'instance': (
+                    "2 instances of <class 'anyblok.model.customer'> "
+                    "found with the filter keys ['name']"
+                ),
+            }
+        )

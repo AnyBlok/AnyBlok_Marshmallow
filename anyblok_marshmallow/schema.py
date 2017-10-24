@@ -12,6 +12,7 @@ from marshmallow_sqlalchemy.schema import (
 )
 from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
+from marshmallow.exceptions import ValidationError
 
 
 class RegistryNotFound(Exception):
@@ -108,13 +109,16 @@ class ModelSchema(Schema):
     def get_registry(self):
         registry = self.context.get('registry', self.registry)
         if not registry:
-            raise RegistryNotFound('No registry found to build schema %r' % self)
+            raise RegistryNotFound(
+                'No registry found to build schema %r' % self)
 
         return registry
 
     def get_post_load_return_instance(self):
-        return self.context.get('post_load_return_instance',
-                                self.post_load_return_instance)
+        if self.post_load_return_instance:
+            return self.post_load_return_instance
+
+        return self.context.get('post_load_return_instance', False)
 
     def generate_marsmallow_instance(self, registry,
                                      post_load_return_instance):
@@ -134,14 +138,44 @@ class ModelSchema(Schema):
                 sqla_session = registry.Session
                 model_converter = ModelConverter
 
+            def valid_postload(self, postload, data, fields):
+                if not postload:
+                    raise ValidationError(
+                        {
+                            "instance": (
+                                "No instance of %r found with the filter keys "
+                                "%r" % (self.opts.model, fields)
+                            ),
+                        },
+                        fields_name=["instance"],
+                        data=data
+                    )
+                elif isinstance(postload, list):
+                    if len(postload) > 1:
+                        raise ValidationError(
+                            {
+                                "instance": (
+                                    "%s instances of %r found with the filter "
+                                    "keys %r" % (
+                                        len(postload), self.opts.model, fields)
+                                ),
+                            },
+                            fields_name=["instance"],
+                            data=data
+                        )
+                    else:
+                        postload = postload[0]
+
+                return postload
+
             @post_load
             def make_instance(self, data):
                 if post_load_return_instance is True:
                     Model = registry.get(model)
                     pks = Model.get_primary_keys()
-                    pks = {x: data[x] for x in pks}
-                    res = Model.from_primary_keys(**pks)
-                    return res
+                    _pks = {x: data[x] for x in pks}
+                    return self.valid_postload(
+                        Model.from_primary_keys(**_pks), data, pks)
 
                 if isinstance(post_load_return_instance, list):
                     # TODO filter add multi level
@@ -151,13 +185,16 @@ class ModelSchema(Schema):
                     for field in post_load_return_instance:
                         filter_by[field] = data[field]
 
-                    return query.filter_by(**filter_by).one()
+                    query = query.filter_by(**filter_by)
+                    return self.valid_postload(
+                        query.all(), data, post_load_return_instance)
 
                 return data
 
         schema = Schema(*self.args, **self.kwargs)
         schema.context['registry'] = registry
         schema.context['post_load_return_instance'] = post_load_return_instance
+
         return schema
 
     @property
