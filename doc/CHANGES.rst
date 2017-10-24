@@ -15,6 +15,7 @@ CHANGELOG
 ------------------
 
 * Add marshmallow schema for AnyBlok for:
+
   - Serialization
   - Deserialization
   - Validation

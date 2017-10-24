@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
 
-version = "1.0.0"
+version = "1.0.1"
 here = abspath(dirname(__file__))
 
 with open(join(here, 'README.rst'), 'r',
