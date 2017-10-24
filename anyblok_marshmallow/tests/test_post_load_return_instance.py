@@ -26,6 +26,7 @@ class TestPostLoad(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
+        return customer
 
     def test_post_load_return_instance_from_context(self):
         registry = self.init_registry(add_complexe_model)
@@ -41,7 +42,7 @@ class TestPostLoad(DBTestCase):
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
-            "<Customer (name='name', tags=[<Tag (name='name')>])>"
+            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
     def test_post_load_return_instance_specific_field(self):
@@ -58,7 +59,7 @@ class TestPostLoad(DBTestCase):
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
-            "<Customer (name='name', tags=[<Tag (name='name')>])>"
+            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
     def test_post_load_return_instance_polymorphic(self):
@@ -100,7 +101,7 @@ class TestPostLoad(DBTestCase):
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
-            "<Customer (name='name', tags=[<Tag (name='name')>])>"
+            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
     def test_post_load_return_instance_from_call(self):
@@ -117,7 +118,7 @@ class TestPostLoad(DBTestCase):
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
-            "<Customer (name='name', tags=[<Tag (name='name')>])>"
+            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
     def test_post_load_return_instance_from_meta(self):
@@ -144,5 +145,5 @@ class TestPostLoad(DBTestCase):
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
-            "<Customer (name='name', tags=[<Tag (name='name')>])>"
+            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )

@@ -95,17 +95,22 @@ class ModelSchema(Schema):
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
-        self._schema = None
+        self._schema = {}
         self.registry = registry or self.opts.registry
         self.post_load_return_instance = (
             post_load_return_instance or self.opts.post_load_return_instance)
 
-    def generate_marsmallow_instance(self):
+    def get_registry(self):
+        return self.context.get('registry', self.registry)
+
+    def get_post_load_return_instance(self):
+        return self.context.get('post_load_return_instance',
+                                self.post_load_return_instance)
+
+    def generate_marsmallow_instance(self, registry,
+                                     post_load_return_instance):
         """Generate the real mashmallow-sqlalchemy schema"""
-        registry = self.context.get('registry', self.registry)
-        post_load_return_instance = self.context.get(
-            'post_load_return_instance',
-            self.post_load_return_instance)
+        model = self.opts.model
 
         class Schema(self.__class__, MS):
             OPTIONS_CLASS = MSO
@@ -122,21 +127,42 @@ class ModelSchema(Schema):
 
             @post_load
             def make_instance(self, data):
+                if post_load_return_instance is True:
+                    Model = registry.get(model)
+                    pks = Model.get_primary_keys()
+                    pks = {x: data[x] for x in pks}
+                    res = Model.from_primary_keys(**pks)
+                    return res
+
+                if isinstance(post_load_return_instance, list):
+                    # TODO filter add multi level
+                    Model = registry.get(model)
+                    query = Model.query()
+                    filter_by = {}
+                    for field in post_load_return_instance:
+                        filter_by[field] = data[field]
+
+                    return query.filter_by(**filter_by).one()
+
                 return data
 
-        self._schema = Schema(*self.args, **self.kwargs)
-        self._schema.context['registry'] = registry
-        self._schema.context['post_load_return_instance'] = (
-            post_load_return_instance)
-        return self._schema
+        schema = Schema(*self.args, **self.kwargs)
+        schema.context['registry'] = registry
+        schema.context['post_load_return_instance'] = post_load_return_instance
+        return schema
 
     @property
     def schema(self):
         """property to get the real schema"""
-        if not self._schema:
-            return self.generate_marsmallow_instance()
+        registry = self.get_registry()
+        post_load_return_instance = self.get_post_load_return_instance()
+        key = (registry, str(post_load_return_instance))
 
-        return self._schema
+        if key not in self._schema:
+            self._schema[key] = self.generate_marsmallow_instance(
+                registry, post_load_return_instance)
+
+        return self._schema[key]
 
     @update_from_kwargs('registry', 'post_load_return_instance')
     def load(self, *args, **kwargs):
