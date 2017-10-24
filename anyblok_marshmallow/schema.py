@@ -37,11 +37,11 @@ def update_from_kwargs(*entries):
                 if entry in kwargs:
                     setattr(instance, entry, kwargs.pop(entry))
 
-            res = f(*args, **kwargs)
-            for entry, value in old_vals:
-                setattr(instance, entry, value)
-
-            return res
+            try:
+                return f(*args, **kwargs)
+            finally:
+                for entry, value in old_vals:
+                    setattr(instance, entry, value)
 
         return wrap_call
 
