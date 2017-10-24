@@ -18,7 +18,7 @@
    :target: https://pypi.python.org/pypi/AnyBlok_Marshmallow/
    :alt: Version status
          
-.. image:: https://readthedocs.org/projects/AnyBlok_Marshmallow/badge/?version=latest
+.. image:: https://readthedocs.org/projects/anyblok-marshmallow/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
     :target: https://doc.anyblok-marshmallow.anyblok.org/?badge=latest
