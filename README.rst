@@ -17,7 +17,7 @@
 .. image:: https://img.shields.io/pypi/v/AnyBlok_Marshmallow.svg
    :target: https://pypi.python.org/pypi/AnyBlok_Marshmallow/
    :alt: Version status
-         
+
 .. image:: https://readthedocs.org/projects/anyblok-marshmallow/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
@@ -36,3 +36,4 @@ the goal is to give the SQLAlchemy Model build by AnyBlok to this librairy
 AnyBlok Marshmallow is released under the terms of the `Mozilla Public License`.
 
 See the `latest documentation <http://doc.anyblok-marshmallow.anyblok.org/>`_
+
