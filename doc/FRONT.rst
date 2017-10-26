@@ -17,7 +17,7 @@ Project Homepage
 ----------------
 
 AnyBlok is hosted on `github <http://github.com>`_ - the main project
-page is at https://githusb.com/AnyBlok/AnyBlok_Marshmallow. Source code is
+page is at https://github.com/AnyBlok/AnyBlok_Marshmallow. Source code is
 tracked here using `GIT <https://git-scm.com>`_.
 
 Releases and project status are available on Pypi at
