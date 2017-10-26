@@ -84,7 +84,7 @@ class ModelSchemaOpts(SchemaOpts):
         self.registry = getattr(meta, 'registry', False)
         self.post_load_return_instance = getattr(
             meta, 'post_load_return_instance', False)
-        self.primary_key = getattr(meta, 'primary_key', False)
+        self.only_primary_key = getattr(meta, 'only_primary_key', False)
 
 
 class ModelSchema(Schema):
@@ -99,12 +99,12 @@ class ModelSchema(Schema):
         registry = kwargs.pop('registry', None)
         post_load_return_instance = kwargs.pop(
             'post_load_return_instance', None)
-        primary_key = kwargs.pop('primary_key', None)
+        only_primary_key = kwargs.pop('only_primary_key', None)
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
         self.registry = registry or self.opts.registry
-        self.primary_key = primary_key or self.opts.primary_key
+        self.only_primary_key = only_primary_key or self.opts.only_primary_key
         self.post_load_return_instance = (
             post_load_return_instance or self.opts.post_load_return_instance)
 
@@ -116,9 +116,8 @@ class ModelSchema(Schema):
 
         return registry
 
-    def get_primary_key(self):
-        print(self.primary_key, self.context)
-        return self.context.get('primary_key', self.primary_key)
+    def get_only_primary_key(self):
+        return self.context.get('only_primary_key', self.only_primary_key)
 
     def get_post_load_return_instance(self):
         if self.post_load_return_instance:
@@ -131,8 +130,7 @@ class ModelSchema(Schema):
         model = self.opts.model
         registry = self.get_registry()
         post_load_return_instance = self.get_post_load_return_instance()
-        primary_key = self.get_primary_key()
-        print(primary_key)
+        only_primary_key = self.get_only_primary_key()
 
         class Schema(self.__class__, MS):
             OPTIONS_CLASS = MSO
@@ -202,13 +200,11 @@ class ModelSchema(Schema):
 
         kwargs = self.kwargs.copy()
 
-        if primary_key:
+        if only_primary_key:
             Model = registry.get(self.opts.model)
             pks = Model.get_primary_keys()
-            print(' ==> ', pks)
             kwargs['only'] = pks
 
-        print(self.args, kwargs)
         schema = Schema(*self.args, **kwargs)
         schema.context['registry'] = registry
         schema.context['post_load_return_instance'] = post_load_return_instance
@@ -220,17 +216,18 @@ class ModelSchema(Schema):
         """property to get the real schema"""
         return self.generate_marsmallow_instance()
 
-    @update_from_kwargs('registry', 'post_load_return_instance', 'primary_key')
+    @update_from_kwargs('registry', 'post_load_return_instance',
+                        'only_primary_key')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'primary_key')
+    @update_from_kwargs('registry', 'only_primary_key')
     def dump(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'primary_key')
+    @update_from_kwargs('registry', 'only_primary_key')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)

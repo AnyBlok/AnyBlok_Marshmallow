@@ -271,30 +271,30 @@ cas be pass by definition, initialization, context or during the call of the (de
 ::
 
     class CustomerSchema(ModelSchema):
-        
+
         class Meta:
             model = "Model.Customer"
-            primary_key = True
+            only_primary_key = True
 
 or
 
 ::
 
-    customer_schema = CustomerSchema(primary_key=True)
+    customer_schema = CustomerSchema(only_primary_key=True)
 
 or
 
 ::
 
-    customer_schema.context['primary_key'] = True
+    customer_schema.context['only_primary_key'] = True
 
 or
 
 ::
 
-    customer_schema.dump(instance, primary_key=True)
-    customer_schema.load(dump_data, primary_key=True)
-    customer_schema.validate(dump_data, primary_key=True)
+    customer_schema.dump(instance, only_primary_key=True)
+    customer_schema.load(dump_data, only_primary_key=True)
+    customer_schema.validate(dump_data, only_primary_key=True)
 
 
 Overriding Generated Fields

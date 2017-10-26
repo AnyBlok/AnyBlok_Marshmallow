@@ -13,10 +13,10 @@ from marshmallow import fields
 
 class TestPrimaryKey(DBTestCase):
 
-    def test_dump_primary_key_from_context(self):
+    def test_dump_only_primary_key_from_context(self):
         registry = self.init_registry(add_complexe_model)
         customer_schema = CustomerSchema(
-            registry=registry, context={'primary_key': True})
+            registry=registry, context={'only_primary_key': True})
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
         customer.tags.append(tag)
@@ -27,27 +27,27 @@ class TestPrimaryKey(DBTestCase):
         self.assertFalse(errors)
         self.assertEqual(data, {'id': customer.id})
 
-    def test_load_primary_key_from_context(self):
+    def test_load_only_primary_key_from_context(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
-            registry=registry, context={'primary_key': True})
+            registry=registry, context={'only_primary_key': True})
         data, errors = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
         self.assertFalse(errors)
 
-    def test_validate_primary_key_from_context(self):
+    def test_validate_only_primary_key_from_context(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
-            registry=registry, context={'primary_key': True})
+            registry=registry, context={'only_primary_key': True})
         errors = customer_schema.validate(dump_data)
         self.assertFalse(errors)
 
-    def test_dump_primary_key_from_init(self):
+    def test_dump_only_primary_key_from_init(self):
         registry = self.init_registry(add_complexe_model)
         customer_schema = CustomerSchema(
-            registry=registry, primary_key=True)
+            registry=registry, only_primary_key=True)
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
         customer.tags.append(tag)
@@ -58,24 +58,24 @@ class TestPrimaryKey(DBTestCase):
         self.assertFalse(errors)
         self.assertEqual(data, {'id': customer.id})
 
-    def test_load_primary_key_from_init(self):
+    def test_load_only_primary_key_from_init(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
-            registry=registry, primary_key=True)
+            registry=registry, only_primary_key=True)
         data, errors = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
         self.assertFalse(errors)
 
-    def test_validate_primary_key_from_init(self):
+    def test_validate_only_primary_key_from_init(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
-            registry=registry, primary_key=True)
+            registry=registry, only_primary_key=True)
         errors = customer_schema.validate(dump_data)
         self.assertFalse(errors)
 
-    def test_dump_primary_key_from_call(self):
+    def test_dump_only_primary_key_from_call(self):
         registry = self.init_registry(add_complexe_model)
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
@@ -85,28 +85,28 @@ class TestPrimaryKey(DBTestCase):
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data, errors = customer_schema.dump(
-            customer, registry=registry, primary_key=True)
+            customer, registry=registry, only_primary_key=True)
         self.assertFalse(errors)
         self.assertEqual(data, {'id': customer.id})
 
-    def test_load_primary_key_from_call(self):
+    def test_load_only_primary_key_from_call(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
         data, errors = customer_schema.load(
-            dump_data, registry=registry, primary_key=True)
+            dump_data, registry=registry, only_primary_key=True)
         self.assertEqual(data, dump_data)
         self.assertFalse(errors)
 
-    def test_validate_primary_key_from_call(self):
+    def test_validate_only_primary_key_from_call(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
         errors = customer_schema.validate(
-            dump_data, registry=registry, primary_key=True)
+            dump_data, registry=registry, only_primary_key=True)
         self.assertFalse(errors)
 
-    def test_dump_primary_key_from_meta(self):
+    def test_dump_only_primary_key_from_meta(self):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
@@ -119,7 +119,7 @@ class TestPrimaryKey(DBTestCase):
             class Meta:
                 model = 'Model.Customer'
                 registry = self.registry
-                primary_key = True
+                only_primary_key = True
 
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
@@ -132,7 +132,7 @@ class TestPrimaryKey(DBTestCase):
         self.assertFalse(errors)
         self.assertEqual(data, {'id': customer.id})
 
-    def test_load_primary_key_from_meta(self):
+    def test_load_only_primary_key_from_meta(self):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
@@ -145,7 +145,7 @@ class TestPrimaryKey(DBTestCase):
             class Meta:
                 model = 'Model.Customer'
                 registry = self.registry
-                primary_key = True
+                only_primary_key = True
 
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
@@ -153,7 +153,7 @@ class TestPrimaryKey(DBTestCase):
         self.assertEqual(data, dump_data)
         self.assertFalse(errors)
 
-    def test_validate_primary_key_from_meta(self):
+    def test_validate_only_primary_key_from_meta(self):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
@@ -166,7 +166,7 @@ class TestPrimaryKey(DBTestCase):
             class Meta:
                 model = 'Model.Customer'
                 registry = self.registry
-                primary_key = True
+                only_primary_key = True
 
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
