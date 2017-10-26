@@ -262,6 +262,41 @@ The value of this options can be:
     The post load is only for load method!!!
 
 
+**only_primary_key** option
+---------------------------
+
+This option add in the only argument the primary keys of the model. As the registry, this option
+cas be pass by definition, initialization, context or during the call of the (de)serialization / validation
+
+::
+
+    class CustomerSchema(ModelSchema):
+        
+        class Meta:
+            model = "Model.Customer"
+            primary_key = True
+
+or
+
+::
+
+    customer_schema = CustomerSchema(primary_key=True)
+
+or
+
+::
+
+    customer_schema.context['primary_key'] = True
+
+or
+
+::
+
+    customer_schema.dump(instance, primary_key=True)
+    customer_schema.load(dump_data, primary_key=True)
+    customer_schema.validate(dump_data, primary_key=True)
+
+
 Overriding Generated Fields
 ---------------------------
 

@@ -11,6 +11,11 @@
 CHANGELOG
 =========
 
+futur
+-----
+
+* Add option put only the primary keys
+
 1.0.2 (2017-10-25)
 ------------------
 

@@ -84,6 +84,7 @@ class ModelSchemaOpts(SchemaOpts):
         self.registry = getattr(meta, 'registry', False)
         self.post_load_return_instance = getattr(
             meta, 'post_load_return_instance', False)
+        self.primary_key = getattr(meta, 'primary_key', False)
 
 
 class ModelSchema(Schema):
@@ -98,11 +99,12 @@ class ModelSchema(Schema):
         registry = kwargs.pop('registry', None)
         post_load_return_instance = kwargs.pop(
             'post_load_return_instance', None)
+        primary_key = kwargs.pop('primary_key', None)
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
-        self._schema = {}
         self.registry = registry or self.opts.registry
+        self.primary_key = primary_key or self.opts.primary_key
         self.post_load_return_instance = (
             post_load_return_instance or self.opts.post_load_return_instance)
 
@@ -114,16 +116,23 @@ class ModelSchema(Schema):
 
         return registry
 
+    def get_primary_key(self):
+        print(self.primary_key, self.context)
+        return self.context.get('primary_key', self.primary_key)
+
     def get_post_load_return_instance(self):
         if self.post_load_return_instance:
             return self.post_load_return_instance
 
         return self.context.get('post_load_return_instance', False)
 
-    def generate_marsmallow_instance(self, registry,
-                                     post_load_return_instance):
+    def generate_marsmallow_instance(self):
         """Generate the real mashmallow-sqlalchemy schema"""
         model = self.opts.model
+        registry = self.get_registry()
+        post_load_return_instance = self.get_post_load_return_instance()
+        primary_key = self.get_primary_key()
+        print(primary_key)
 
         class Schema(self.__class__, MS):
             OPTIONS_CLASS = MSO
@@ -191,7 +200,16 @@ class ModelSchema(Schema):
 
                 return data
 
-        schema = Schema(*self.args, **self.kwargs)
+        kwargs = self.kwargs.copy()
+
+        if primary_key:
+            Model = registry.get(self.opts.model)
+            pks = Model.get_primary_keys()
+            print(' ==> ', pks)
+            kwargs['only'] = pks
+
+        print(self.args, kwargs)
+        schema = Schema(*self.args, **kwargs)
         schema.context['registry'] = registry
         schema.context['post_load_return_instance'] = post_load_return_instance
 
@@ -200,27 +218,19 @@ class ModelSchema(Schema):
     @property
     def schema(self):
         """property to get the real schema"""
-        registry = self.get_registry()
-        post_load_return_instance = self.get_post_load_return_instance()
-        key = (registry, str(post_load_return_instance))
+        return self.generate_marsmallow_instance()
 
-        if key not in self._schema:
-            self._schema[key] = self.generate_marsmallow_instance(
-                registry, post_load_return_instance)
-
-        return self._schema[key]
-
-    @update_from_kwargs('registry', 'post_load_return_instance')
+    @update_from_kwargs('registry', 'post_load_return_instance', 'primary_key')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
 
-    @update_from_kwargs('registry')
+    @update_from_kwargs('registry', 'primary_key')
     def dump(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
-    @update_from_kwargs('registry')
+    @update_from_kwargs('registry', 'primary_key')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)
