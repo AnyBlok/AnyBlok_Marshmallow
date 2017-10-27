@@ -100,10 +100,12 @@ class ModelSchema(Schema):
         post_load_return_instance = kwargs.pop(
             'post_load_return_instance', None)
         only_primary_key = kwargs.pop('only_primary_key', None)
+        model = kwargs.pop('model', None)
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
         self.registry = registry or self.opts.registry
+        self.model = model or self.opts.model
         self.only_primary_key = only_primary_key or self.opts.only_primary_key
         self.post_load_return_instance = (
             post_load_return_instance or self.opts.post_load_return_instance)
@@ -119,6 +121,9 @@ class ModelSchema(Schema):
     def get_only_primary_key(self):
         return self.context.get('only_primary_key', self.only_primary_key)
 
+    def get_model(self):
+        return self.context.get('model', self.model)
+
     def get_post_load_return_instance(self):
         if self.post_load_return_instance:
             return self.post_load_return_instance
@@ -127,7 +132,7 @@ class ModelSchema(Schema):
 
     def generate_marsmallow_instance(self):
         """Generate the real mashmallow-sqlalchemy schema"""
-        model = self.opts.model
+        model = self.get_model()
         registry = self.get_registry()
         post_load_return_instance = self.get_post_load_return_instance()
         only_primary_key = self.get_only_primary_key()
@@ -141,7 +146,7 @@ class ModelSchema(Schema):
             validate = MS.validate
 
             class Meta:
-                model = registry.get(self.opts.model)
+                model = registry.get(self.get_model())
                 sqla_session = registry.Session
                 model_converter = ModelConverter
 
@@ -201,7 +206,7 @@ class ModelSchema(Schema):
         kwargs = self.kwargs.copy()
 
         if only_primary_key:
-            Model = registry.get(self.opts.model)
+            Model = registry.get(model)
             pks = Model.get_primary_keys()
             kwargs['only'] = pks
 
@@ -217,17 +222,17 @@ class ModelSchema(Schema):
         return self.generate_marsmallow_instance()
 
     @update_from_kwargs('registry', 'post_load_return_instance',
-                        'only_primary_key')
+                        'only_primary_key', 'model')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'only_primary_key')
+    @update_from_kwargs('registry', 'only_primary_key', 'model')
     def dump(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'only_primary_key')
+    @update_from_kwargs('registry', 'only_primary_key', 'model')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)

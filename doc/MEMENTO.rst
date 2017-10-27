@@ -262,11 +262,45 @@ The value of this options can be:
     The post load is only for load method!!!
 
 
+**model** option
+----------------
+
+This option add in the model name. As the registry, this option
+can be passed by definition, initialization, context or during the call of the (de)serialization / validation
+
+::
+
+    class AnySchema(ModelSchema):
+
+        class Meta:
+            model = "Model.Customer"
+
+or
+
+::
+
+    any_schema = AnySchema(model="Model.customer")
+
+or
+
+::
+
+    any_schema.context['model'] = "Model.Customer"
+
+or
+
+::
+
+    any_schema.dump(instance, model="Model.Customer")
+    any_schema.load(dump_data, model="Model.Customer")
+    any_schema.validate(dump_data, model="Model.Customer")
+
+
 **only_primary_key** option
 ---------------------------
 
 This option add in the only argument the primary keys of the model. As the registry, this option
-cas be pass by definition, initialization, context or during the call of the (de)serialization / validation
+can be passed by definition, initialization, context or during the call of the (de)serialization / validation
 
 ::
 
