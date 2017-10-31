@@ -17,6 +17,7 @@ futur
 * Add option put only the primary keys
 * Fix the Front page
 * REF model option, can be given by another way than Meta
+* Put RegistryNotFound in exceptions
 
 1.0.2 (2017-10-25)
 ------------------

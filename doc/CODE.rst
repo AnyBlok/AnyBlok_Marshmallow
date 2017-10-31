@@ -8,13 +8,10 @@
 
 .. contents::
 
-Code
-====
-
-.. automodule:: anyblok_marshmallow.schema
-
 Exceptions
-----------
+==========
+
+.. automodule:: anyblok_marshmallow.exceptions
 
 **RegistryNotFound**
 ~~~~~~~~~~~~~~~~~~~~
@@ -24,6 +21,12 @@ Exceptions
     :noindex:
     :show-inheritance:
     :inherited-members:
+
+
+Schemas
+=======
+
+.. automodule:: anyblok_marshmallow.schema
 
 **update_from_kwargs**
 ----------------------

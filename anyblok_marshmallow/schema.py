@@ -13,11 +13,7 @@ from marshmallow_sqlalchemy.schema import (
 from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
-
-
-class RegistryNotFound(Exception):
-    """Exception raised when no registry is found to build schema"""
-    pass
+from .exceptions import RegistryNotFound
 
 
 def update_from_kwargs(*entries):
