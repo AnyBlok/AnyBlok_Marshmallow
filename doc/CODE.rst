@@ -8,8 +8,8 @@
 
 .. contents::
 
-Exceptions
-==========
+Code
+====
 
 .. automodule:: anyblok_marshmallow.exceptions
 
@@ -22,8 +22,6 @@ Exceptions
     :show-inheritance:
     :inherited-members:
 
-Fields
-======
 
 .. automodule:: anyblok_marshmallow.fields
 
@@ -36,9 +34,6 @@ Fields
     :show-inheritance:
     :inherited-members:
 
-
-Schemas
-=======
 
 .. automodule:: anyblok_marshmallow.schema
 
