@@ -18,6 +18,7 @@ futur
 * Fix the Front page
 * REF model option, can be given by another way than Meta
 * Put RegistryNotFound in exceptions
+* Add Nested field, this field is not cached
 
 1.0.2 (2017-10-25)
 ------------------

@@ -11,7 +11,7 @@
 from anyblok.column import Integer, String
 from anyblok.relationship import Many2One, Many2Many
 from anyblok_marshmallow import ModelSchema
-from marshmallow import fields
+from anyblok_marshmallow.fields import Nested
 
 
 def add_simple_model():
@@ -86,7 +86,7 @@ class TagSchema(ModelSchema):
 
 class AddressSchema(ModelSchema):
 
-    city = fields.Nested(CitySchema)
+    city = Nested(CitySchema)
 
     class Meta:
         model = 'Model.Address'
@@ -94,8 +94,8 @@ class AddressSchema(ModelSchema):
 
 class CustomerSchema(ModelSchema):
 
-    addresses = fields.Nested(AddressSchema, many=True, exclude=('customer', ))
-    tags = fields.Nested(TagSchema, many=True)
+    addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
+    tags = Nested(TagSchema, many=True)
 
     class Meta:
         model = 'Model.Customer'

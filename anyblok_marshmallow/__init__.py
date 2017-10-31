@@ -7,4 +7,4 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 
 from .schema import ModelSchema  # noqa
-from .exceptions import ModelSchema  # noqa
+from .exceptions import RegistryNotFound  # noqa

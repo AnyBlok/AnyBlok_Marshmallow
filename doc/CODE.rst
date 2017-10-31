@@ -22,6 +22,20 @@ Exceptions
     :show-inheritance:
     :inherited-members:
 
+Fields
+======
+
+.. automodule:: anyblok_marshmallow.fields
+
+**Nested**
+~~~~~~~~~~
+
+.. autoclass:: Nested
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
 
 Schemas
 =======
