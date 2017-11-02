@@ -75,7 +75,7 @@ Declare your schema
 ::
 
     from anyblok_marshmallow import ModelSchema
-    from marshmallow import fields
+    from anyblok_marshmallow.fields import Nested
 
     class CitySchema(ModelSchema):
 
@@ -92,7 +92,7 @@ Declare your schema
     class AddressSchema(ModelSchema):
 
         # follow the relationship Many2One and One2One
-        city = fields.Nested(CitySchema)
+        city = Nested(CitySchema)
 
         class Meta:
             model = 'Model.Address'
@@ -103,8 +103,8 @@ Declare your schema
         # follow the relationship One2Many and Many2Many
         # - the many=True is required because it is *2Many
         # - exclude is used to forbid the recurse loop
-        addresses = fields.Nested(AddressSchema, many=True, exclude=('customer', ))
-        tags = fields.Nested(TagSchema, many=True)
+        addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
+        tags = Nested(TagSchema, many=True)
 
         class Meta:
             model = 'Model.Customer'
@@ -116,6 +116,13 @@ Declare your schema
 
 
     customer_schema = CustomerSchema()
+
+
+.. note::
+
+    **New** in version **1.1.0** the Nested field must come from **anyblok_marshmallow**,
+    because **marshmallow** cache the Nested field with the context. And the context is not propagated
+    again if it changed
 
 
 (De)serialize your data and validate it
@@ -329,19 +336,3 @@ or
     customer_schema.dump(instance, only_primary_key=True)
     customer_schema.load(dump_data, only_primary_key=True)
     customer_schema.validate(dump_data, only_primary_key=True)
-
-
-Overriding Generated Fields
----------------------------
-
-:: 
-
-    from anyblok_marshmallow import ModelSchema
-    from marshmallow import fields
-
-    class Customer(ModelSchema):
-
-        date_created = field_for(Author, 'date_created', dump_only=True)
-
-        class Meta:
-            model = 'Model.Customer'

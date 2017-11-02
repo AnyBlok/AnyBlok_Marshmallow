@@ -8,13 +8,13 @@
 
 .. contents::
 
-Code
-====
+Exceptions
+==========
 
 .. automodule:: anyblok_marshmallow.exceptions
 
 **RegistryNotFound**
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 .. autoexception:: RegistryNotFound
     :members:
@@ -25,8 +25,11 @@ Code
 
 .. automodule:: anyblok_marshmallow.fields
 
+Fields
+======
+
 **Nested**
-~~~~~~~~~~
+----------
 
 .. autoclass:: Nested
     :members:
@@ -36,6 +39,9 @@ Code
 
 
 .. automodule:: anyblok_marshmallow.schema
+
+Schema
+======
 
 **update_from_kwargs**
 ----------------------
