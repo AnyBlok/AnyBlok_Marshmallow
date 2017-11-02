@@ -11,8 +11,8 @@
 CHANGELOG
 =========
 
-futur
------
+1.1.0 (2017-11-02)
+------------------
 
 * Add option put only the primary keys
 * Fix the Front page
