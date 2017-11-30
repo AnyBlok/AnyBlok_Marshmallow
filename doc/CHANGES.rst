@@ -11,8 +11,8 @@
 CHANGELOG
 =========
 
-1.2.0
------
+1.2.0 (2017-11-30)
+------------------
 
 * [REF] decrease complexity
 * [IMP] Add ``validates_schema`` on ModelSchema to automaticly check
