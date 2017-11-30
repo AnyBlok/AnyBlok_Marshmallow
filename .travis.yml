@@ -40,7 +40,7 @@ env:
     - ANYBLOK_DATABASE_USER=postgres
 
 script:
-  - flake8 anyblok_multi_engines
+  - flake8 anyblok_marshmallow
   - psql -c 'create database travis_ci_test;' -U postgres
   - nosetests anyblok_marshmallow/tests -v -s --with-coverage --cover-package=anyblok_marshmallow
   
