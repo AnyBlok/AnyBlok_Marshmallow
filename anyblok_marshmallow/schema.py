@@ -83,6 +83,67 @@ class ModelSchemaOpts(SchemaOpts):
         self.only_primary_key = getattr(meta, 'only_primary_key', False)
 
 
+class TemplateSchema:
+    OPTIONS_CLASS = MSO
+    __init__ = MS.__init__
+    load = MS.load
+    dump = MS.dump
+    validate = MS.validate
+
+    def valid_postload(self, postload, data, fields):
+        if not postload:
+            raise ValidationError(
+                {
+                    "instance": (
+                        "No instance of %r found with the filter keys "
+                        "%r" % (self.opts.model, fields)
+                    ),
+                },
+                fields_name=["instance"],
+                data=data
+            )
+        elif isinstance(postload, list):
+            if len(postload) > 1:
+                raise ValidationError(
+                    {
+                        "instance": (
+                            "%s instances of %r found with the filter "
+                            "keys %r" % (
+                                len(postload), self.opts.model, fields)
+                        ),
+                    },
+                    fields_name=["instance"],
+                    data=data
+                )
+            else:
+                postload = postload[0]
+
+        return postload
+
+    @post_load
+    def make_instance(self, data):
+        if self.post_load_return_instance is True:
+            Model = self.opts.model
+            pks = Model.get_primary_keys()
+            _pks = {x: data[x] for x in pks}
+            return self.valid_postload(
+                Model.from_primary_keys(**_pks), data, pks)
+
+        if isinstance(self.post_load_return_instance, list):
+            # TODO filter add multi level
+            Model = self.opts.model
+            query = Model.query()
+            filter_by = {}
+            for field in self.post_load_return_instance:
+                filter_by[field] = data[field]
+
+            query = query.filter_by(**filter_by)
+            return self.valid_postload(
+                query.all(), data, self.post_load_return_instance)
+
+        return data
+
+
 class ModelSchema(Schema):
     """A marshmallow schema based on the AnyBlok Model
 
@@ -133,71 +194,22 @@ class ModelSchema(Schema):
         post_load_return_instance = self.get_post_load_return_instance()
         only_primary_key = self.get_only_primary_key()
 
-        class Schema(self.__class__, MS):
-            OPTIONS_CLASS = MSO
-
-            __init__ = MS.__init__
-            load = MS.load
-            dump = MS.dump
-            validate = MS.validate
-
-            class Meta:
-                model = registry.get(self.get_model())
-                sqla_session = registry.Session
-                model_converter = ModelConverter
-
-            def valid_postload(self, postload, data, fields):
-                if not postload:
-                    raise ValidationError(
-                        {
-                            "instance": (
-                                "No instance of %r found with the filter keys "
-                                "%r" % (self.opts.model, fields)
-                            ),
-                        },
-                        fields_name=["instance"],
-                        data=data
-                    )
-                elif isinstance(postload, list):
-                    if len(postload) > 1:
-                        raise ValidationError(
-                            {
-                                "instance": (
-                                    "%s instances of %r found with the filter "
-                                    "keys %r" % (
-                                        len(postload), self.opts.model, fields)
-                                ),
-                            },
-                            fields_name=["instance"],
-                            data=data
-                        )
-                    else:
-                        postload = postload[0]
-
-                return postload
-
-            @post_load
-            def make_instance(self, data):
-                if post_load_return_instance is True:
-                    Model = registry.get(model)
-                    pks = Model.get_primary_keys()
-                    _pks = {x: data[x] for x in pks}
-                    return self.valid_postload(
-                        Model.from_primary_keys(**_pks), data, pks)
-
-                if isinstance(post_load_return_instance, list):
-                    # TODO filter add multi level
-                    Model = registry.get(model)
-                    query = Model.query()
-                    filter_by = {}
-                    for field in post_load_return_instance:
-                        filter_by[field] = data[field]
-
-                    query = query.filter_by(**filter_by)
-                    return self.valid_postload(
-                        query.all(), data, post_load_return_instance)
-
-                return data
+        Schema = type(
+            'Model.Schema.%s' % model,
+            (TemplateSchema, self.__class__, MS),
+            {
+                'post_load_return_instance': post_load_return_instance,
+                'Meta': type(
+                    'Meta',
+                    tuple(),
+                    {
+                        'model': registry.get(model),
+                        'sqla_session': registry.Session,
+                        'model_converter': ModelConverter,
+                    },
+                ),
+            }
+        )
 
         kwargs = self.kwargs.copy()
 
