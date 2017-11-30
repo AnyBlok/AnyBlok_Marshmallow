@@ -150,3 +150,21 @@ class TestPrimaryKey(DBTestCase):
         errors = customer_schema.validate(
             dump_data, registry=registry, model="Model.Customer")
         self.assertFalse(errors)
+
+    def test_validate_with_wrong_field(self):
+        registry = self.init_registry(add_complexe_model)
+        dump_data = {
+            'id': 1,
+            'name': 'test',
+            'wrong_field': 'test',
+        }
+        customer_schema = AnySchema()
+        errors = customer_schema.validate(
+            dump_data, registry=registry, model="Model.Customer")
+        self.assertEqual(
+            errors,
+            {
+                'wrong_field':
+                ["Unknown fields {'wrong_field'} on Model Model.Customer"]
+            }
+        )

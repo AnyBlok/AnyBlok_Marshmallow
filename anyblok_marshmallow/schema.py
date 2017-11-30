@@ -5,7 +5,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from marshmallow import Schema, post_load, SchemaOpts
+from marshmallow import Schema, post_load, SchemaOpts, validates_schema
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
     ModelSchemaOpts as MSO
@@ -142,6 +142,17 @@ class TemplateSchema:
                 query.all(), data, self.post_load_return_instance)
 
         return data
+
+    @validates_schema(pass_original=True)
+    def check_unknown_fields(self, data, original_data):
+        unknown = set(original_data) - set(self.fields)
+        if unknown:
+            raise ValidationError(
+                'Unknown fields %r on Model %s' % (
+                    unknown, self.opts.model.__registry_name__
+                ),
+                unknown
+            )
 
 
 class ModelSchema(Schema):

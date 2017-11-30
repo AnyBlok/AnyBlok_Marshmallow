@@ -15,6 +15,8 @@ CHANGELOG
 -----
 
 * [REF] decrease complexity
+* [IMP] Add ``validates_schema`` on ModelSchema to automaticly check
+  if the field exist on the model
 
 1.1.0 (2017-11-02)
 ------------------
