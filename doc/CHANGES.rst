@@ -16,6 +16,7 @@ CHANGELOG
 
 * [ADD] unittest on some case
 * [FIX] AnyBlok field.Function is return as MarshMallow fields.Raw
+* [ADD] fields.File, type to encode and decode to/from base 64
 
 1.2.0 (2017-11-30)
 ------------------
