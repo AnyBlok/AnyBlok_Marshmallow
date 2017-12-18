@@ -6,6 +6,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from marshmallow import Schema, post_load, SchemaOpts, validates_schema
+from marshmallow.fields import Raw
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
     ModelSchemaOpts as MSO
@@ -59,9 +60,12 @@ class ModelConverter(MC):
     The goal if to fix the fieldname, because they are prefixed.
     """
 
-    def fields_for_model(self, *args, **kwargs):
+    def fields_for_model(self, model, **kwargs):
         """Overwrite the method and remove prefix of the field name"""
-        res = super(ModelConverter, self).fields_for_model(*args, **kwargs)
+        res = super(ModelConverter, self).fields_for_model(model, **kwargs)
+        for field in model.loaded_fields.keys():
+            res[field] = Raw()
+
         return {format_fields(x): y for x, y in res.items()}
 
 

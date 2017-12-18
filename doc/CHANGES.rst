@@ -11,6 +11,12 @@
 CHANGELOG
 =========
 
+1.3.0
+-----
+
+* [ADD] unittest on some case
+* [FIX] AnyBlok field.Function is return as MarshMallow fields.Raw
+
 1.2.0 (2017-11-30)
 ------------------
 
