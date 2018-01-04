@@ -163,8 +163,8 @@ class TestPostLoad(DBTestCase):
             errors,
             {
                 'instance': (
-                    "No instance of <class 'anyblok.model.customer'> found "
-                    "with the filter keys ['id']"
+                    "No instance of <class 'anyblok.model.ModelCustomer'> "
+                    "found with the filter keys ['id']"
                 ),
             }
         )
@@ -184,8 +184,8 @@ class TestPostLoad(DBTestCase):
             errors,
             {
                 'instance': (
-                    "No instance of <class 'anyblok.model.customer'> found "
-                    "with the filter keys ['id']"
+                    "No instance of <class 'anyblok.model.ModelCustomer'> "
+                    "found with the filter keys ['id']"
                 ),
             }
         )
@@ -211,7 +211,7 @@ class TestPostLoad(DBTestCase):
             errors,
             {
                 'instance': (
-                    "2 instances of <class 'anyblok.model.customer'> "
+                    "2 instances of <class 'anyblok.model.ModelCustomer'> "
                     "found with the filter keys ['name']"
                 ),
             }
