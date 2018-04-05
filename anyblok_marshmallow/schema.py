@@ -1,11 +1,14 @@
 # This file is a part of the AnyBlok / Marshmallow api project
 #
 #    Copyright (C) 2017 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+#    Copyright (C) 2018 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from marshmallow import Schema, post_load, SchemaOpts, validates_schema
+from marshmallow import (
+    Schema, post_load, SchemaOpts, validates_schema, validate
+)
 from marshmallow.fields import Raw
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
@@ -66,7 +69,18 @@ class ModelConverter(MC):
         for field in model.loaded_fields.keys():
             res[field] = Raw()
 
-        return {format_fields(x): y for x, y in res.items()}
+        fields = {format_fields(x): y for x, y in res.items()}
+        fields_description = model.fields_description(fields.keys())
+        for field in fields:
+            if fields_description[field]['type'] == 'Selection':
+                validators = fields[field].validate
+                choices = list(dict(
+                    fields_description[field]['selections']).keys())
+                labels = list(dict(
+                    fields_description[field]['selections']).values())
+                validators.append(validate.OneOf(choices, labels=labels))
+
+        return fields
 
 
 class ModelSchemaOpts(SchemaOpts):

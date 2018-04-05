@@ -11,6 +11,12 @@
 CHANGELOG
 =========
 
+1.4.0
+-----
+
+* In the case of the field **Selection**, the validator **OneOf** is 
+  applied with the available values come from the AnyBlok columns
+
 1.3.0 (2017-12-23)
 ------------------
 
