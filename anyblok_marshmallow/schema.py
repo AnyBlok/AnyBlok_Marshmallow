@@ -90,14 +90,11 @@ class ModelSchemaOpts(SchemaOpts):
 
     * model: name of an AnyBlok model **required**
     * registry: an AnyBlok registry
-    * post_load_return_instance: return an instance object
     """
     def __init__(self, meta, *args, **kwargs):
         super(ModelSchemaOpts, self).__init__(meta, *args, **kwargs)
         self.model = getattr(meta, 'model', False)
         self.registry = getattr(meta, 'registry', False)
-        self.post_load_return_instance = getattr(
-            meta, 'post_load_return_instance', False)
         self.only_primary_key = getattr(meta, 'only_primary_key', False)
 
 
@@ -107,6 +104,37 @@ class TemplateSchema:
     load = MS.load
     dump = MS.dump
     validate = MS.validate
+
+    @validates_schema(pass_original=True)
+    def check_unknown_fields(self, data, original_data):
+        od = set()
+        for x in (original_data if self.many else [original_data]):
+            od.update(set(x))
+
+        unknown = od - set(self.fields)
+        if unknown:
+            raise ValidationError(
+                'Unknown fields %r on Model %s' % (
+                    unknown, self.opts.model.__registry_name__
+                ),
+                unknown
+            )
+
+    @post_load
+    def make_instance(self, data):
+        return self.get_instance_from(data)
+
+    def get_instance_from(self, data):
+        try:
+            return super(TemplateSchema, self).get_instance_from(data)
+        except ValidationError:
+            raise
+        except:
+            return data
+
+
+class PostLoadSchema:
+    post_load_attributes = True
 
     def valid_postload(self, postload, data, fields):
         if not postload:
@@ -138,43 +166,35 @@ class TemplateSchema:
 
         return postload
 
-    @post_load
-    def make_instance(self, data):
-        if self.post_load_return_instance is True:
+    def get_instance_from(self, data):
+        if self.post_load_attributes is True:
             Model = self.opts.model
             pks = Model.get_primary_keys()
             _pks = {x: data[x] for x in pks}
             return self.valid_postload(
                 Model.from_primary_keys(**_pks), data, pks)
 
-        if isinstance(self.post_load_return_instance, list):
-            # TODO filter add multi level
+        if isinstance(self.post_load_attributes, list):
             Model = self.opts.model
             query = Model.query()
             filter_by = {}
-            for field in self.post_load_return_instance:
+            for field in self.post_load_attributes:
+                if field not in data:
+                    raise ValidationError(
+                        {
+                            "KeyError": "%r is unknow in the data" % field,
+                        },
+                        fields_name=[field],
+                        data=data
+                    )
+
                 filter_by[field] = data[field]
 
             query = query.filter_by(**filter_by)
             return self.valid_postload(
-                query.all(), data, self.post_load_return_instance)
+                query.all(), data, self.post_load_attributes)
 
         return data
-
-    @validates_schema(pass_original=True)
-    def check_unknown_fields(self, data, original_data):
-        od = set()
-        for x in (original_data if self.many else [original_data]):
-            od.update(set(x))
-
-        unknown = od - set(self.fields)
-        if unknown:
-            raise ValidationError(
-                'Unknown fields %r on Model %s' % (
-                    unknown, self.opts.model.__registry_name__
-                ),
-                unknown
-            )
 
 
 class ModelSchema(Schema):
@@ -187,8 +207,6 @@ class ModelSchema(Schema):
 
     def __init__(self, *args, **kwargs):
         registry = kwargs.pop('registry', None)
-        post_load_return_instance = kwargs.pop(
-            'post_load_return_instance', None)
         only_primary_key = kwargs.pop('only_primary_key', None)
         model = kwargs.pop('model', None)
         super(ModelSchema, self).__init__(*args, **kwargs)
@@ -197,8 +215,6 @@ class ModelSchema(Schema):
         self.registry = registry or self.opts.registry
         self.model = model or self.opts.model
         self.only_primary_key = only_primary_key or self.opts.only_primary_key
-        self.post_load_return_instance = (
-            post_load_return_instance or self.opts.post_load_return_instance)
 
     def get_registry(self):
         registry = self.context.get('registry', self.registry)
@@ -214,24 +230,16 @@ class ModelSchema(Schema):
     def get_model(self):
         return self.context.get('model', self.model)
 
-    def get_post_load_return_instance(self):
-        if self.post_load_return_instance:
-            return self.post_load_return_instance
-
-        return self.context.get('post_load_return_instance', False)
-
     def generate_marsmallow_instance(self):
         """Generate the real mashmallow-sqlalchemy schema"""
         model = self.get_model()
         registry = self.get_registry()
-        post_load_return_instance = self.get_post_load_return_instance()
         only_primary_key = self.get_only_primary_key()
 
         Schema = type(
             'Model.Schema.%s' % model,
             (TemplateSchema, self.__class__, MS),
             {
-                'post_load_return_instance': post_load_return_instance,
                 'Meta': type(
                     'Meta',
                     tuple(),
@@ -253,7 +261,6 @@ class ModelSchema(Schema):
 
         schema = Schema(*self.args, **kwargs)
         schema.context['registry'] = registry
-        schema.context['post_load_return_instance'] = post_load_return_instance
 
         return schema
 
@@ -262,8 +269,7 @@ class ModelSchema(Schema):
         """property to get the real schema"""
         return self.generate_marsmallow_instance()
 
-    @update_from_kwargs('registry', 'post_load_return_instance',
-                        'only_primary_key', 'model')
+    @update_from_kwargs('registry', 'only_primary_key', 'model')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)

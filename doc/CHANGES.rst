@@ -14,6 +14,7 @@ CHANGELOG
 1.4.0
 -----
 
+* Replace **post_load_return_instance** method by **PostLoad** class
 * In the case of the field **Selection**, the validator **OneOf** is 
   applied with the available values come from the AnyBlok columns
 

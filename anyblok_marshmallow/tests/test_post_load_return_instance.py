@@ -6,15 +6,33 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
-from . import add_complexe_model, CustomerSchema, AddressSchema, TagSchema
-from anyblok_marshmallow import ModelSchema
-from marshmallow import fields
+from . import add_complexe_model, CustomerSchema
+from anyblok_marshmallow import ModelSchema, PostLoadSchema
 
 
-class ColumnSchema(ModelSchema):
+class ColumnSchema(PostLoadSchema, ModelSchema):
 
     class Meta:
         model = "Model.System.Column"
+
+
+class ColumnSchema2(PostLoadSchema, ModelSchema):
+    post_load_attributes = ['model', 'name']
+
+    class Meta:
+        model = "Model.System.Column"
+
+
+class PostLoadCustomSchema(CustomerSchema, PostLoadSchema):
+    pass
+
+
+class PostLoadCustomSchema2(CustomerSchema, PostLoadSchema):
+    post_load_attributes = ['name']
+
+
+class PostLoadCustomSchema3(CustomerSchema, PostLoadSchema):
+    post_load_attributes = ['ko']
 
 
 class TestPostLoad(DBTestCase):
@@ -28,10 +46,9 @@ class TestPostLoad(DBTestCase):
             customer=customer, city=city, street="Somewhere")
         return customer
 
-    def test_post_load_return_instance_from_context(self):
+    def test_post_load(self):
         registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema(
-            context={'post_load_return_instance': True})
+        customer_schema = PostLoadCustomSchema()
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
@@ -45,10 +62,9 @@ class TestPostLoad(DBTestCase):
             "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
-    def test_post_load_return_instance_specific_field(self):
+    def test_post_load_with_specific_field(self):
         registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema(
-            context={'post_load_return_instance': ['id']})
+        customer_schema = PostLoadCustomSchema2()
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
@@ -62,10 +78,25 @@ class TestPostLoad(DBTestCase):
             "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
         )
 
-    def test_post_load_return_instance_polymorphic(self):
+    def test_post_load_with_specific_field_wrong_field(self):
         registry = self.init_registry(add_complexe_model)
-        column_schema = ColumnSchema(
-            context={'post_load_return_instance': True})
+        customer_schema = PostLoadCustomSchema3()
+        customer_schema.context['registry'] = registry
+
+        customer = self.get_customer(registry)
+        dump_data = customer_schema.dump(customer).data
+        data, errors = customer_schema.load(dump_data)
+
+        self.assertEqual(
+            errors,
+            {
+                'KeyError': "'ko' is unknow in the data"
+            }
+        )
+
+    def test_post_load_with_polymorphism(self):
+        registry = self.init_registry(add_complexe_model)
+        column_schema = ColumnSchema()
         column_schema.context['registry'] = registry
 
         column = registry.System.Column.query().first()
@@ -77,8 +108,7 @@ class TestPostLoad(DBTestCase):
 
     def test_post_load_return_instance_polymorphic_specific_field(self):
         registry = self.init_registry(add_complexe_model)
-        column_schema = ColumnSchema(
-            context={'post_load_return_instance': ['model', 'name']})
+        column_schema = ColumnSchema2()
         column_schema.context['registry'] = registry
 
         column = registry.System.Column.query().first()
@@ -88,70 +118,9 @@ class TestPostLoad(DBTestCase):
         self.assertFalse(errors)
         self.assertIs(data, column)
 
-    def test_load_post_load_return_instance_from_init(self):
+    def test_post_load_no_instance_found(self):
         registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema(post_load_return_instance=True)
-        customer_schema.context['registry'] = registry
-
-        customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
-
-        self.assertFalse(errors)
-        self.assertIs(data, customer)
-        self.assertEqual(
-            repr(data),
-            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
-        )
-
-    def test_post_load_return_instance_from_call(self):
-        registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema()
-        customer_schema.context['registry'] = registry
-
-        customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(
-            dump_data, post_load_return_instance=True)
-
-        self.assertFalse(errors)
-        self.assertIs(data, customer)
-        self.assertEqual(
-            repr(data),
-            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
-        )
-
-    def test_post_load_return_instance_from_meta(self):
-        registry = self.init_registry(add_complexe_model)
-
-        class CustomerSchema(ModelSchema):
-
-            addresses = fields.Nested(
-                AddressSchema, many=True, exclude=('customer', ))
-            tags = fields.Nested(TagSchema, many=True)
-
-            class Meta:
-                model = 'Model.Customer'
-                post_load_return_instance = True
-
-        customer_schema = CustomerSchema()
-        customer_schema.context['registry'] = registry
-        customer = self.get_customer(registry)
-
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
-
-        self.assertFalse(errors)
-        self.assertIs(data, customer)
-        self.assertEqual(
-            repr(data),
-            "<Customer(name='C1', tags=[<Tag(name='tag 1')>])>"
-        )
-
-    def test_post_load_return_instance_ko(self):
-        registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema(
-            context={'post_load_return_instance': True})
+        customer_schema = PostLoadCustomSchema()
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
@@ -169,37 +138,9 @@ class TestPostLoad(DBTestCase):
             }
         )
 
-    def test_post_load_return_instance_specific_field_ko(self):
+    def test_post_load_with_more_than_one_instance(self):
         registry = self.init_registry(add_complexe_model)
-        customer_schema = CustomerSchema(
-            context={'post_load_return_instance': ['id']})
-        customer_schema.context['registry'] = registry
-
-        customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        dump_data['id'] += 1
-        data, errors = customer_schema.load(dump_data)
-
-        self.assertEqual(
-            errors,
-            {
-                'instance': (
-                    "No instance of <class 'anyblok.model.ModelCustomer'> "
-                    "found with the filter keys ['id']"
-                ),
-            }
-        )
-
-    def test_post_load_return_instance_specific_field_ko_2(self):
-        registry = self.init_registry(add_complexe_model)
-
-        class CustomerSchema(ModelSchema):
-
-            class Meta:
-                model = 'Model.Customer'
-
-        customer_schema = CustomerSchema(
-            context={'post_load_return_instance': ['name']})
+        customer_schema = PostLoadCustomSchema2()
         customer_schema.context['registry'] = registry
 
         self.get_customer(registry)
