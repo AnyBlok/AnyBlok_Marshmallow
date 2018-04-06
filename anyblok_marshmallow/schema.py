@@ -147,7 +147,7 @@ class TemplateSchema:
             return super(TemplateSchema, self).get_instance_from(data)
         except ValidationError:
             raise
-        except:
+        except Exception:
             return data
 
 
