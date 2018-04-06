@@ -17,6 +17,9 @@ CHANGELOG
 * Replace **post_load_return_instance** method by **PostLoad** class
 * In the case of the field **Selection**, the validator **OneOf** is 
   applied with the available values come from the AnyBlok columns
+* Replace **marshmallow_sqlalchemy.fields.Related** by 
+  **anyblok_marshmallow.fields.Nested**. The goal is to improve the consistent 
+  between all field in the schema
 
 1.3.0 (2017-12-23)
 ------------------

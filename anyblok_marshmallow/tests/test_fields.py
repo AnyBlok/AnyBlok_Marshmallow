@@ -12,7 +12,6 @@ from anyblok_marshmallow.fields import Nested, File
 from anyblok import Declarations
 from anyblok.column import Integer, LargeBinary, Selection
 from anyblok.field import Function
-from anyblok.relationship import One2One
 from os import urandom
 from base64 import b64encode
 
@@ -28,17 +27,6 @@ class TestField(DBTestCase):
 
             def _get_name(self):
                 return 'test'
-
-    def add_field_one2one(self):
-
-        @Declarations.register(Declarations.Model)
-        class Exemple:
-            id = Integer(primary_key=True)
-
-        @Declarations.register(Declarations.Model)
-        class Exemple2:
-            id = Integer(primary_key=True)
-            exemple = One2One(model='Model.Exemple', backref='exemple2')
 
     def add_field_largebinary(self):
 
@@ -269,98 +257,6 @@ class TestField(DBTestCase):
                 model = 'Model.Exemple'
 
         return ExempleSchema
-
-    def test_dump_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple_schema = self.getExempleSchema()(registry=registry)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
-        self.assertEqual(
-            data,
-            {
-                'id': exemple.id,
-                'exemple2': {
-                    'id': exemple2.id,
-                },
-            }
-        )
-
-    def test_dump_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple2_schema = self.getExemple2Schema()(registry=registry)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple2_schema.dump(exemple2)
-        self.assertFalse(errors)
-        self.assertEqual(
-            data,
-            {
-                'id': exemple.id,
-                'exemple': {
-                    'id': exemple.id,
-                },
-            }
-        )
-
-    def test_load_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        dump_data = {
-            'id': exemple.id,
-            'exemple2': {
-                'id': exemple2.id,
-            },
-        }
-        exemple_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
-
-    def test_load_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        dump_data = {
-            'id': exemple2.id,
-            'exemple': {
-                'id': exemple.id,
-            }
-        }
-        exemple2_schema = self.getExemple2Schema()(registry=registry)
-        data, errors = exemple2_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
-
-    def test_validate_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        dump_data = {
-            'id': exemple.id,
-            'exemple2': {
-                'id': exemple2.id,
-            },
-        }
-        exemple_schema = self.getExempleSchema()(registry=registry)
-        errors = exemple_schema.validate(dump_data)
-        self.assertFalse(errors)
-
-    def test_validate_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
-        exemple = registry.Exemple.insert()
-        exemple2 = registry.Exemple2.insert(exemple=exemple)
-        dump_data = {
-            'id': exemple2.id,
-            'exemple': {
-                'id': exemple.id,
-            }
-        }
-        exemple2_schema = self.getExemple2Schema()(registry=registry)
-        errors = exemple2_schema.validate(dump_data)
-        self.assertFalse(errors)
 
     def test_dump_file(self):
         registry = self.init_registry(self.add_field_largebinary)

@@ -18,6 +18,7 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
+from .fields import Nested
 
 
 def update_from_kwargs(*entries):
@@ -63,22 +64,39 @@ class ModelConverter(MC):
     The goal if to fix the fieldname, because they are prefixed.
     """
 
-    def fields_for_model(self, model, **kwargs):
+    def fields_for_model(self, Model, **kwargs):
         """Overwrite the method and remove prefix of the field name"""
-        res = super(ModelConverter, self).fields_for_model(model, **kwargs)
-        for field in model.loaded_fields.keys():
+        res = super(ModelConverter, self).fields_for_model(Model, **kwargs)
+        for field in Model.loaded_fields.keys():
             res[field] = Raw()
 
         fields = {format_fields(x): y for x, y in res.items()}
-        fields_description = model.fields_description(fields.keys())
+        fields_description = Model.fields_description()
         for field in fields:
-            if fields_description[field]['type'] == 'Selection':
+            if field not in fields_description:
+                continue
+
+            type_ = fields_description[field]['type']
+            if type_ == 'Selection':
                 validators = fields[field].validate
                 choices = list(dict(
                     fields_description[field]['selections']).keys())
                 labels = list(dict(
                     fields_description[field]['selections']).values())
                 validators.append(validate.OneOf(choices, labels=labels))
+            elif type_ in ('Many2One', 'One2One', 'One2Many', 'Many2Many'):
+                many = False if type_ in ('Many2One', 'One2One') else True
+                remote_model = fields_description[field]['model']
+                RemoteModel = Model.registry.get(remote_model)
+
+                sch = type(
+                    'Model.Schema.' + remote_model,
+                    (ModelSchema,),
+                    {'Meta': type('Meta', tuple(), {'model': remote_model})}
+                )
+
+                fields[field] = Nested(
+                    sch, many=many, only=RemoteModel.get_primary_keys())
 
         return fields
 

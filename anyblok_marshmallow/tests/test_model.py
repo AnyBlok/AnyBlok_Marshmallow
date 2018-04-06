@@ -33,8 +33,16 @@ class TestPrimaryKey(DBTestCase):
             {
                 'id': customer.id,
                 'name': customer.name,
-                'addresses': [address.id],
-                'tags': [tag.id],
+                'addresses': [
+                    {
+                        'id': address.id,
+                    },
+                ],
+                'tags': [
+                    {
+                        'id': tag.id,
+                    },
+                ],
             }
         )
 
@@ -78,8 +86,16 @@ class TestPrimaryKey(DBTestCase):
             {
                 'id': customer.id,
                 'name': customer.name,
-                'addresses': [address.id],
-                'tags': [tag.id],
+                'addresses': [
+                    {
+                        'id': address.id,
+                    },
+                ],
+                'tags': [
+                    {
+                        'id': tag.id,
+                    },
+                ],
             }
         )
 
@@ -123,8 +139,16 @@ class TestPrimaryKey(DBTestCase):
             {
                 'id': customer.id,
                 'name': customer.name,
-                'addresses': [address.id],
-                'tags': [tag.id],
+                'addresses': [
+                    {
+                        'id': address.id,
+                    },
+                ],
+                'tags': [
+                    {
+                        'id': tag.id,
+                    },
+                ],
             }
         )
 
