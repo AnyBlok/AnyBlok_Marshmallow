@@ -15,7 +15,7 @@ CHANGELOG
 1.4.0 (2018-04-07)
 ------------------
 
-* Replace **post_load_return_instance** method by **PostLoad** class
+* Replace **post_load_return_instance** method by **PostLoadSchema** class
 * In the case of the field **Selection**, the validator **OneOf** is 
   applied with the available values come from the AnyBlok columns
 * Replace **marshmallow_sqlalchemy.fields.Related** by 

@@ -74,7 +74,7 @@ Declare your schema
 
 ::
 
-    from anyblok_marshmallow import ModelSchema, PostLoad, Nested
+    from anyblok_marshmallow import ModelSchema, PostLoadSchema, Nested
 
     class CitySchema(ModelSchema):
 
@@ -97,7 +97,7 @@ Declare your schema
             model = 'Model.Address'
 
 
-    class CustomerSchema(PostLoad, ModelSchema):
+    class CustomerSchema(PostLoadSchema, ModelSchema):
 
         # follow the relationship One2Many and Many2Many
         # - the many=True is required because it is *2Many
@@ -124,7 +124,7 @@ Declare your schema
 .. note::
 
     **Ref** in version **1.4.0**, ``post_load_return_instance`` was replaced by the mixin class
-    ``PostLoad``
+    ``PostLoadSchema``
 
 
 (De)serialize your data and validate it
@@ -186,7 +186,7 @@ Declare your schema
 
 .. note::
 
-    We have an instance of the model cause of the mixin ``PostLoad``
+    We have an instance of the model cause of the mixin ``PostLoadSchema``
 
 
 Give the registry
