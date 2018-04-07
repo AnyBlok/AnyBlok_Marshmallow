@@ -74,8 +74,7 @@ Declare your schema
 
 ::
 
-    from anyblok_marshmallow import ModelSchema
-    from anyblok_marshmallow.fields import Nested
+    from anyblok_marshmallow import ModelSchema, PostLoad, Nested
 
     class CitySchema(ModelSchema):
 
@@ -98,7 +97,7 @@ Declare your schema
             model = 'Model.Address'
 
 
-    class CustomerSchema(ModelSchema):
+    class CustomerSchema(PostLoad, ModelSchema):
 
         # follow the relationship One2Many and Many2Many
         # - the many=True is required because it is *2Many
@@ -111,8 +110,6 @@ Declare your schema
             # optionally attach an AnyBlok registry
             # to use for serialization, desarialization and validation
             registry = registry
-            # optionally return an AnyBlok model instance
-            post_load_return_instance = True
 
 
     customer_schema = CustomerSchema()
@@ -123,6 +120,11 @@ Declare your schema
     **New** in version **1.1.0** the Nested field must come from **anyblok_marshmallow**,
     because **marshmallow** cache the Nested field with the context. And the context is not propagated
     again if it changed
+
+.. note::
+
+    **Ref** in version **1.4.0**, ``post_load_return_instance`` was replaced by the mixin class
+    ``PostLoad``
 
 
 (De)serialize your data and validate it
@@ -182,12 +184,9 @@ Declare your schema
     errors = customer_schema.validate(dump_data)
     # dict with all the validating errors
 
-
 .. note::
 
-    By default: the deserialization return a dict with deserialized data, 
-    here we get an instance of the model because the ``CustomerSchema`` add 
-    ``post_load_return_instance = True`` in their Meta
+    We have an instance of the model cause of the mixin ``PostLoad``
 
 
 Give the registry
@@ -245,28 +244,6 @@ Add the **registry** when the de(serialization or validatoris called
     customer_schema.dump(customer, registry=registry)
     customer_schema.load(dump_data, registry=registry)
     customer_schema.validate(dump_data, registry=registry)
-
-
-**post_load_return_instance** option
-------------------------------------
-
-As the registry this option can be passed by initialization of the schema, by the
-context or during the call of methods
-
-The value of this options can be:
-
-* False: **default**, the output is a dict
-* True: the output is an instance of the model. The primary keys must be in value
-* array of string: the output is an instance of the model, each str entry must be an existing column
-
-.. warning::
-
-    If the option is not False, and the instance can no be found, then the **instance** error will be added
-    in the errors dict of the method
-
-.. warning::
-
-    The post load is only for load method!!!
 
 
 **model** option
