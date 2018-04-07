@@ -1,6 +1,7 @@
 .. This file is a part of the AnyBlok / Marshmallow project
 ..
 ..    Copyright (C) 2017 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+..    Copyright (C) 2018 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
 ..
 .. This Source Code Form is subject to the terms of the Mozilla Public License,
 .. v. 2.0. If a copy of the MPL was not distributed with this file,You can
@@ -11,8 +12,8 @@
 CHANGELOG
 =========
 
-1.4.0
------
+1.4.0 (2018-04-07)
+------------------
 
 * Replace **post_load_return_instance** method by **PostLoad** class
 * In the case of the field **Selection**, the validator **OneOf** is 
