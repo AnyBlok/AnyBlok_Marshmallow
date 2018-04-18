@@ -273,6 +273,20 @@ class TestField(DBTestCase):
             }
         )
 
+    def test_dump_file_with_value_is_none(self):
+        registry = self.init_registry(self.add_field_largebinary)
+        exemple_schema = self.getExempleSchemaLO()(registry=registry)
+        exemple = registry.Exemple.insert(file=None)
+        data, errors = exemple_schema.dump(exemple)
+        self.assertFalse(errors)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'file': None,
+            }
+        )
+
     def test_load_file(self):
         registry = self.init_registry(self.add_field_function)
         file_ = urandom(100)
@@ -283,6 +297,17 @@ class TestField(DBTestCase):
         exemple_schema = self.getExempleSchemaLO()(registry=registry)
         data, errors = exemple_schema.load(dump_data)
         self.assertEqual(data, {'id': 1, 'file': file_})
+        self.assertFalse(errors)
+
+    def test_load_file_with_value_is_none(self):
+        registry = self.init_registry(self.add_field_function)
+        dump_data = {
+            'id': 1,
+            'file': '',
+        }
+        exemple_schema = self.getExempleSchemaLO()(registry=registry)
+        data, errors = exemple_schema.load(dump_data)
+        self.assertEqual(data, {'id': 1, 'file': None})
         self.assertFalse(errors)
 
     def test_validate_file(self):
