@@ -40,29 +40,11 @@ class File(Field):
         return None
 
 
+class Text(String):
+    pass
+
+
 class JsonCollection(Field):
-    """Allow to filter a value by the an ``AnyBlok.column.Json`` entry from
-    an instance of any AnyBlok's Model.
-
-    To work, the context must contains the dict **instances**::
-
-        schema.context = {
-            'instances': {
-                'default': instance_for_default,
-                'another_named_instance': another_named_instance,
-            },
-        }
-
-    :param instance: name of the instance in the context
-    :param fieldname: name of the ``AnyBlok.column.Json`` in the instance
-    :param keys: list of string which represent the path in the json to get
-                 the collection with this values
-    :param cls_or_instance_type: A ``marshmallow.fields.`` type to represent
-                                 the type of value wanted and saved in the
-                                 collection (default:
-                                 ``marshmallow.fields.String``)
-    :exception: ValueError
-    """
 
     def __init__(self, fieldname=None, keys=None, instance='default',
                  cls_or_instance_type=String, *args, **kwargs):

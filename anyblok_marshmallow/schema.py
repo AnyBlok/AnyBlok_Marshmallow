@@ -18,7 +18,8 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
-from .fields import Nested
+from .fields import Nested, Text
+import sqlalchemy as sa
 
 
 def update_from_kwargs(*entries):
@@ -63,6 +64,10 @@ class ModelConverter(MC):
 
     The goal if to fix the fieldname, because they are prefixed.
     """
+    SQLA_TYPE_MAPPING = MC.SQLA_TYPE_MAPPING.copy()
+    SQLA_TYPE_MAPPING.update({
+        sa.Text: Text,
+    })
 
     def fields_for_model(self, Model, **kwargs):
         """Overwrite the method and remove prefix of the field name"""

@@ -17,6 +17,7 @@ CHANGELOG
 
 * Add JsonCollection field, Allow to add a check in function of an collection
   stored in a AnyBlok.fields.Json
+* Add Text field, to represent an ``anyblok.column.Text``
 
 1.4.0 (2018-04-07)
 ------------------

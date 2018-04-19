@@ -7,14 +7,16 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import ModelSchema, fields
+from anyblok.column import Integer, Text
+from anyblok import Declarations
 
 
 class AnySchema(ModelSchema):
     pass
 
 
-class TestPrimaryKey(DBTestCase):
+class TestModelSchema(DBTestCase):
 
     def test_dump_model_from_context(self):
         registry = self.init_registry(add_complexe_model)
@@ -192,3 +194,22 @@ class TestPrimaryKey(DBTestCase):
                 ["Unknown fields {'wrong_field'} on Model Model.Customer"]
             }
         )
+
+    def test_anyblok_text_is_represented_by_anyblok_marshmallow_text(self):
+
+        def add_in_registry():
+
+            @Declarations.register(Declarations.Model)
+            class Exemple:
+                id = Integer(primary_key=True)
+                name = Text()
+
+        registry = self.init_registry(add_in_registry)
+
+        class ExempleSchema(ModelSchema):
+            class Meta:
+                model = 'Model.Exemple'
+
+        schema = ExempleSchema(registry=registry).schema
+        field = schema.fields['name']
+        self.assertTrue(isinstance(field, fields.Text))
