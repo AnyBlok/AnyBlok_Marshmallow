@@ -12,6 +12,12 @@
 CHANGELOG
 =========
 
+1.5.0
+-----
+
+* Add JsonCollection field, Allow to add a check in function of an collection
+  stored in a AnyBlok.fields.Json
+
 1.4.0 (2018-04-07)
 ------------------
 

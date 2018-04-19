@@ -227,6 +227,7 @@ class ModelSchema(Schema):
         registry = kwargs.pop('registry', None)
         only_primary_key = kwargs.pop('only_primary_key', None)
         model = kwargs.pop('model', None)
+        self.instances = kwargs.pop('instances', {})
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
@@ -252,6 +253,7 @@ class ModelSchema(Schema):
         """Generate the real mashmallow-sqlalchemy schema"""
         model = self.get_model()
         registry = self.get_registry()
+        instances = self.context.get('instances', self.instances)
         only_primary_key = self.get_only_primary_key()
 
         Schema = type(
@@ -279,6 +281,7 @@ class ModelSchema(Schema):
 
         schema = Schema(*self.args, **kwargs)
         schema.context['registry'] = registry
+        schema.context['instances'] = instances
 
         return schema
 
@@ -287,17 +290,17 @@ class ModelSchema(Schema):
         """property to get the real schema"""
         return self.generate_marsmallow_instance()
 
-    @update_from_kwargs('registry', 'only_primary_key', 'model')
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'only_primary_key', 'model')
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def dump(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'only_primary_key', 'model')
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)

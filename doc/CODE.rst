@@ -37,6 +37,25 @@ Fields
     :show-inheritance:
     :inherited-members:
 
+**File**
+--------
+
+.. autoclass:: File
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+
+**JsonCollection**
+------------------
+
+.. autoclass:: JsonCollection
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
 
 .. automodule:: anyblok_marshmallow.schema
 

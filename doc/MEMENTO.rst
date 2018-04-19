@@ -313,3 +313,84 @@ or
     customer_schema.dump(instance, only_primary_key=True)
     customer_schema.load(dump_data, only_primary_key=True)
     customer_schema.validate(dump_data, only_primary_key=True)
+
+Use the field JsonCollection
+----------------------------
+
+This field allow the schema to inspect an AnyBlok.fields.Json in an any specific instance to 
+validate the value.
+
+AnyBlok models::
+
+    @register(Model)
+    class Template:
+        name = anyblok.column.String(primary_key=True)
+        properties = anyblok.column.Json(defaumt={})
+
+    @register(Model)
+    class SaleOrder:
+        id = anyblok.column.Integer(primary_key=True)
+        number = anyblok.column.Integer(nullable=False)
+        discount = anyblok.column.Integer()
+
+AnyBlok / Marchmallow schema::
+
+    class SaleOrderSchema(ModelSchema):
+        class Meta:
+            model = 'Model.SaleOrder'
+
+        discount = JsonCollection(
+            fieldname='properties',
+            keys=['allowed_discount'],
+            cls_or_instance_type=marshmallow.fields.Integer(required=True)
+        )
+
+Use::
+
+    goodcustomer = registry.Template.insert(
+        name='Good customer',
+        properties={'allowed_discount': [10, 15, 30]
+    )
+    customer = registry.Template.insert(
+        name='Customer',
+        properties={'allowed_discount': [0, 5, 10]
+    )
+    badcustomer = registry.Template.insert(
+        name='Bad customer',
+        properties={'allowed_discount': [0]
+    )
+
+    schema = SaleOrderSchema(registry=registry)
+
+    --------------------------
+
+    data, errors = schema.load(
+        {
+            number='SO0001',
+            discount=10,
+        },
+        instances={'default': goodcustomer}
+    )
+    ==> error = {}
+
+    --------------------------
+
+    data, errors = schema.load(
+        {
+            number='SO0001',
+            discount=10,
+        },
+        instances={'default': customer}
+    )
+    ==> error = {}
+
+    --------------------------
+
+    data, errors = schema.load(
+        {
+            number='SO0001',
+            discount=10,
+        },
+        instances={'default': badcustomer}
+    )
+    ==> error = {'discount': ['Not a valid choice']}
