@@ -39,6 +39,13 @@ from marshmallow.fields import (  # noqa
     Constant,
 )
 
+__all__ = [
+    'Nested',
+    'File',
+    'Text',
+    'JsonCollection',
+]
+
 
 class Nested(FieldNested):
     """Inherit marshmallow fields.Nested"""
