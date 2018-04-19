@@ -645,12 +645,12 @@ class TestField(DBTestCase):
             @Declarations.register(Declarations.Model)
             class Exemple1:
                 id = Integer(primary_key=True)
-                properties = Json(default={})
+                properties1 = Json(default={})
 
             @Declarations.register(Declarations.Model)
             class Exemple2:
                 id = Integer(primary_key=True)
-                properties = Json(default={})
+                properties2 = Json(default={})
 
             @Declarations.register(Declarations.Model)
             class Exemple3:
@@ -660,25 +660,25 @@ class TestField(DBTestCase):
 
         registry = self.init_registry(add_in_registry)
         exemple1 = registry.Exemple1.insert(
-            properties={'sub': {'name': ['foo1', 'bar1']}})
+            properties1={'sub': {'name': ['foo1', 'bar1']}})
         exemple2 = registry.Exemple2.insert(
-            properties={'sub': {'sub': {
+            properties2={'sub': {'sub': {
                 'name': {'foo2': 'Foo 2', 'bar2': 'Bar 2'}}}})
         exemple3 = registry.Exemple3.insert(name1='foo', name2='foo2')
 
         class JsonCollectionSchema(ModelSchema):
             class Meta:
-                model = 'Model.Exemple2'
+                model = 'Model.Exemple3'
 
             name1 = JsonCollection(
-                fieldname="properties",
+                fieldname="properties1",
                 keys=['sub', 'name'],
-                instance='exemple1'
+                instance='theexemple1'
             )
             name2 = JsonCollection(
-                fieldname="properties",
+                fieldname="properties2",
                 keys=['sub', 'sub', 'name'],
-                instance='exemple2'
+                instance='theexemple2'
             )
 
         exemple_schema = JsonCollectionSchema(registry=registry)
@@ -688,7 +688,7 @@ class TestField(DBTestCase):
                 'name1': "foo1",
                 'name2': "foo2",
             },
-            instances=dict(exemple1=exemple1, exemple2=exemple2)
+            instances=dict(theexemple1=exemple1, theexemple2=exemple2)
         )
         self.assertFalse(errors)
 

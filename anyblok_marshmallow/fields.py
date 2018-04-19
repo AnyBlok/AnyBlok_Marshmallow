@@ -5,11 +5,39 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from marshmallow.fields import Nested as FieldNested, Field, String
 from marshmallow.exceptions import ValidationError
 from marshmallow.base import FieldABC
 from marshmallow.validate import OneOf
 from base64 import b64encode, b64decode
+from marshmallow.fields import (  # noqa
+    Field,
+    Raw,
+    Nested as FieldNested,
+    Dict,
+    List,
+    String,
+    UUID,
+    Number,
+    Integer,
+    Decimal,
+    Boolean,
+    FormattedString,
+    Float,
+    DateTime,
+    LocalDateTime,
+    Time,
+    Date,
+    TimeDelta,
+    Url,
+    URL,
+    Email,
+    Method,
+    Function,
+    Str,
+    Bool,
+    Int,
+    Constant,
+)
 
 
 class Nested(FieldNested):
@@ -41,7 +69,7 @@ class File(Field):
 
 
 class Text(String):
-    pass
+    """Simple field use to distinct by the class String and Text"""
 
 
 class JsonCollection(Field):

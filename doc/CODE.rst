@@ -46,6 +46,15 @@ Fields
     :show-inheritance:
     :inherited-members:
 
+**Text**
+--------
+
+.. autoclass:: Text
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
 
 **JsonCollection**
 ------------------
