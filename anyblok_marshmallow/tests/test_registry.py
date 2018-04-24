@@ -22,8 +22,7 @@ class TestRegistry(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -73,9 +72,8 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema(context={'registry': registry})
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_registry_from_context(self):
         registry = self.init_registry(add_complexe_model)
@@ -113,8 +111,7 @@ class TestRegistry(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -164,9 +161,8 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema(registry=registry)
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_registry_from_init(self):
         registry = self.init_registry(add_complexe_model)
@@ -204,8 +200,7 @@ class TestRegistry(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer, registry=registry)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer, registry=registry)
         self.assertEqual(
             data,
             {
@@ -255,9 +250,8 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema()
-        data, errors = customer_schema.load(dump_data, registry=registry)
+        data = customer_schema.load(dump_data, registry=registry)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_registry_from_call(self):
         registry = self.init_registry(add_complexe_model)
@@ -307,8 +301,7 @@ class TestRegistry(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -370,9 +363,8 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema()
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_registry_from_meta(self):
         registry = self.init_registry(add_complexe_model)

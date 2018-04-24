@@ -61,8 +61,7 @@ class TestField(DBTestCase):
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -79,9 +78,8 @@ class TestField(DBTestCase):
         }
         exemple_schema = ModelSchema(
             registry=registry, context={'model': "Model.Exemple"})
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_function(self):
         registry = self.init_registry(self.add_field_function)
@@ -100,8 +98,7 @@ class TestField(DBTestCase):
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -118,9 +115,8 @@ class TestField(DBTestCase):
         }
         exemple_schema = ModelSchema(
             registry=registry, context={'model': "Model.Exemple"})
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_selection_with_object_ko(self):
         registry = self.init_registry(self.add_field_selection_with_object)
@@ -130,8 +126,13 @@ class TestField(DBTestCase):
         }
         exemple_schema = ModelSchema(
             registry=registry, context={'model': "Model.Exemple"})
-        data, errors = exemple_schema.load(dump_data)
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'name': ['Not a valid choice.']}
+        )
 
     def test_validate_selection_with_object_ok(self):
         registry = self.init_registry(self.add_field_selection_with_object)
@@ -161,8 +162,7 @@ class TestField(DBTestCase):
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -179,9 +179,8 @@ class TestField(DBTestCase):
         }
         exemple_schema = ModelSchema(
             registry=registry, context={'model': "Model.Exemple"})
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_selection_with_classmethod_ko(self):
         registry = self.init_registry(self.add_field_selection_with_classmethod)
@@ -191,8 +190,14 @@ class TestField(DBTestCase):
         }
         exemple_schema = ModelSchema(
             registry=registry, context={'model': "Model.Exemple"})
-        data, errors = exemple_schema.load(dump_data)
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
+
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'name': ['Not a valid choice.']}
+        )
 
     def test_validate_selection_with_classmethod_ok(self):
         registry = self.init_registry(self.add_field_selection_with_classmethod)
@@ -264,8 +269,7 @@ class TestField(DBTestCase):
         exemple_schema = self.getExempleSchemaLO()(registry=registry)
         file_ = urandom(100)
         exemple = registry.Exemple.insert(file=file_)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -278,8 +282,7 @@ class TestField(DBTestCase):
         registry = self.init_registry(self.add_field_largebinary)
         exemple_schema = self.getExempleSchemaLO()(registry=registry)
         exemple = registry.Exemple.insert(file=None)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -296,9 +299,8 @@ class TestField(DBTestCase):
             'file': b64encode(file_).decode('utf-8'),
         }
         exemple_schema = self.getExempleSchemaLO()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, {'id': 1, 'file': file_})
-        self.assertFalse(errors)
 
     def test_load_file_with_value_is_none(self):
         registry = self.init_registry(self.add_field_function)
@@ -307,9 +309,8 @@ class TestField(DBTestCase):
             'file': '',
         }
         exemple_schema = self.getExempleSchemaLO()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, {'id': 1, 'file': None})
-        self.assertFalse(errors)
 
     def test_validate_file(self):
         registry = self.init_registry(self.add_field_function)
@@ -380,11 +381,10 @@ class TestField(DBTestCase):
         exemple = registry.Exemple.insert(properties={'name': ['foo', 'bar']})
         exemple2 = registry.Exemple2.insert(name='foo')
         exemple_schema = self.getJsonPropertySchema1(registry=registry)
-        data, errors = exemple_schema.dump(
+        data = exemple_schema.dump(
             exemple2,
             instances=dict(default=exemple)
         )
-        self.assertFalse(errors)
         self.assertEqual(
             data,
             {
@@ -399,11 +399,10 @@ class TestField(DBTestCase):
             properties={'name': {'foo': 'Foo', 'bar': 'Bar'}})
         exemple2 = registry.Exemple2.insert(name='foo')
         exemple_schema = self.getJsonPropertySchema1(registry=registry)
-        data, errors = exemple_schema.dump(
+        data = exemple_schema.dump(
             exemple2,
             instances=dict(default=exemple)
         )
-        self.assertFalse(errors)
         self.assertEqual(
             data,
             {
@@ -428,11 +427,10 @@ class TestField(DBTestCase):
             )
 
         exemple_schema = JsonCollectionSchema(registry=registry)
-        data, errors = exemple_schema.dump(
+        data = exemple_schema.dump(
             exemple2,
             instances=dict(default=exemple)
         )
-        self.assertFalse(errors)
         self.assertEqual(
             data,
             {
@@ -449,12 +447,11 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo'
         }
-        data, errors = exemple_schema.load(
+        data = exemple_schema.load(
             dump_data,
             instances=dict(default=exemple)
         )
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_json_collection_ko_not_a_valid_choice(self):
         registry = self.init_registry(self.add_field_json_collection_property)
@@ -464,11 +461,15 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'other'
         }
-        data, errors = exemple_schema.load(
-            dump_data,
-            instances=dict(default=exemple)
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(
+                dump_data,
+                instances=dict(default=exemple)
+            )
+        self.assertEqual(
+            exception.exception.messages,
+            {'name': ['Not a valid choice.']}
         )
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
 
     def test_load_json_collection_ko_no_instance(self):
         registry = self.init_registry(self.add_field_json_collection_property)
@@ -477,9 +478,10 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'other'
         }
-        data, errors = exemple_schema.load(dump_data)
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
         self.assertEqual(
-            errors,
+            exception.exception.messages,
             {
                 'name': {
                     'fieldname': (
@@ -504,11 +506,15 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 3
         }
-        data, errors = exemple_schema.load(
-            dump_data,
-            instances=dict(default=exemple)
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(
+                dump_data,
+                instances=dict(default=exemple)
+            )
+        self.assertEqual(
+            exception.exception.messages,
+            {'name': ['Not a valid string.']}
         )
-        self.assertEqual(errors, {'name': ['Not a valid string.']})
 
     def test_load_json_collection_ko_no_property_values(self):
         registry = self.init_registry(self.add_field_json_collection_property)
@@ -518,12 +524,13 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo'
         }
-        data, errors = exemple_schema.load(
-            dump_data,
-            instances=dict(default=exemple)
-        )
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(
+                dump_data,
+                instances=dict(default=exemple)
+            )
         self.assertEqual(
-            errors,
+            exception.exception.messages,
             {
                 'name': {
                     'instance values': (

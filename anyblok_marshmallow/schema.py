@@ -130,10 +130,7 @@ class TemplateSchema:
 
     @validates_schema(pass_original=True)
     def check_unknown_fields(self, data, original_data):
-        od = set()
-        for x in (original_data if self.many else [original_data]):
-            od.update(set(x))
-
+        od = set(original_data.keys())
         unknown = od - set(self.fields)
         if unknown:
             raise ValidationError(

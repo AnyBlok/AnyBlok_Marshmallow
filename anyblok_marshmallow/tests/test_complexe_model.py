@@ -20,8 +20,7 @@ class TestComplexeSchema(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -71,9 +70,8 @@ class TestComplexeSchema(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema(context={'registry': registry})
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_complexe_schema(self):
         registry = self.init_registry(add_complexe_model)

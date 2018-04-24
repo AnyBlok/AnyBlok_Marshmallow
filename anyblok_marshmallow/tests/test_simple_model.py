@@ -15,35 +15,34 @@ class TestSimpleModel(DBTestCase):
         registry = self.init_registry(add_simple_model)
         exemple_schema = ExempleSchema(context={'registry': registry})
         exemple = registry.Exemple.insert(name="test")
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(data, {'number': None, 'id': 1, 'name': 'test'})
 
     def test_load_simple_schema_1(self):
         registry = self.init_registry(add_simple_model)
         exemple_schema = ExempleSchema(context={'registry': registry})
         exemple = registry.Exemple.insert(name="test")
-        data, errors = exemple_schema.load(
-            {'id': exemple.id, 'name': exemple.name})
+        data = exemple_schema.load({'id': exemple.id, 'name': exemple.name})
         self.assertEqual(data, {'id': exemple.id, 'name': exemple.name})
-        self.assertFalse(errors)
 
     def test_load_simple_schema_2(self):
         registry = self.init_registry(add_simple_model)
         exemple_schema = ExempleSchema(context={'registry': registry})
         exemple = registry.Exemple.insert(name="test")
-        data, errors = exemple_schema.load({'id': exemple.id})
-        self.assertEqual(data, {'id': exemple.id})
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load({'id': exemple.id})
+
         self.assertEqual(
-            errors, {'name': ["Missing data for required field."]})
+            exception.exception.messages,
+            {'name': ["Missing data for required field."]}
+        )
 
     def test_load_simple_schema_3(self):
         registry = self.init_registry(add_simple_model)
         exemple_schema = ExempleSchema(
             partial=('name',), context={'registry': registry})
         exemple = registry.Exemple.insert(name="test")
-        data, errors = exemple_schema.load({'id': exemple.id})
-        self.assertFalse(errors)
+        data = exemple_schema.load({'id': exemple.id})
         self.assertEqual(data, {'id': exemple.id})
 
     def test_load_simple_schema_4(self):

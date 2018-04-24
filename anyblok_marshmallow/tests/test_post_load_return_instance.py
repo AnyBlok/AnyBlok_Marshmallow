@@ -52,10 +52,9 @@ class TestPostLoad(DBTestCase):
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
+        dump_data = customer_schema.dump(customer)
+        data = customer_schema.load(dump_data)
 
-        self.assertFalse(errors)
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
@@ -68,10 +67,9 @@ class TestPostLoad(DBTestCase):
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
+        dump_data = customer_schema.dump(customer)
+        data = customer_schema.load(dump_data)
 
-        self.assertFalse(errors)
         self.assertIs(data, customer)
         self.assertEqual(
             repr(data),
@@ -84,11 +82,12 @@ class TestPostLoad(DBTestCase):
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
+        dump_data = customer_schema.dump(customer)
+        with self.assertRaises(ValidationError) as exception:
+            customer_schema.load(dump_data)
 
         self.assertEqual(
-            errors,
+            exception.exception.messages,
             {
                 'KeyError': "'ko' is unknow in the data"
             }
@@ -100,10 +99,9 @@ class TestPostLoad(DBTestCase):
         column_schema.context['registry'] = registry
 
         column = registry.System.Column.query().first()
-        dump_data = column_schema.dump(column).data
-        data, errors = column_schema.load(dump_data)
+        dump_data = column_schema.dump(column)
+        data = column_schema.load(dump_data)
 
-        self.assertFalse(errors)
         self.assertIs(data, column)
 
     def test_post_load_return_instance_polymorphic_specific_field(self):
@@ -112,10 +110,9 @@ class TestPostLoad(DBTestCase):
         column_schema.context['registry'] = registry
 
         column = registry.System.Column.query().first()
-        dump_data = column_schema.dump(column).data
-        data, errors = column_schema.load(dump_data)
+        dump_data = column_schema.dump(column)
+        data = column_schema.load(dump_data)
 
-        self.assertFalse(errors)
         self.assertIs(data, column)
 
     def test_post_load_no_instance_found(self):
@@ -124,12 +121,13 @@ class TestPostLoad(DBTestCase):
         customer_schema.context['registry'] = registry
 
         customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
+        dump_data = customer_schema.dump(customer)
         dump_data['id'] += 1
-        data, errors = customer_schema.load(dump_data)
+        with self.assertRaises(ValidationError) as exception:
+            customer_schema.load(dump_data)
 
         self.assertEqual(
-            errors,
+            exception.exception.messages,
             {
                 'instance': (
                     "No instance of <class 'anyblok.model.ModelCustomer'> "
@@ -145,11 +143,12 @@ class TestPostLoad(DBTestCase):
 
         self.get_customer(registry)
         customer = self.get_customer(registry)
-        dump_data = customer_schema.dump(customer).data
-        data, errors = customer_schema.load(dump_data)
+        dump_data = customer_schema.dump(customer)
+        with self.assertRaises(ValidationError) as exception:
+            customer_schema.load(dump_data)
 
         self.assertEqual(
-            errors,
+            exception.exception.messages,
             {
                 'instance': (
                     "2 instances of <class 'anyblok.model.ModelCustomer'> "

@@ -69,8 +69,7 @@ class TestField(DBTestCase):
         exemple_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -86,8 +85,7 @@ class TestField(DBTestCase):
         exemple2_schema = self.getExemple2Schema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple2_schema.dump(exemple2)
-        self.assertFalse(errors)
+        data = exemple2_schema.dump(exemple2)
         self.assertEqual(
             data,
             {
@@ -109,9 +107,8 @@ class TestField(DBTestCase):
             },
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_one2one_2(self):
         registry = self.init_registry(self.add_field_one2one)
@@ -124,9 +121,8 @@ class TestField(DBTestCase):
             }
         }
         exemple2_schema = self.getExemple2Schema()(registry=registry)
-        data, errors = exemple2_schema.load(dump_data)
+        data = exemple2_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_one2one_1(self):
         registry = self.init_registry(self.add_field_one2one)
@@ -169,17 +165,15 @@ class TestField(DBTestCase):
             ],
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_dump_one2many(self):
         registry = self.init_registry(self.add_field_one2many)
         exemple_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -219,17 +213,15 @@ class TestField(DBTestCase):
             }
         }
         exemple2_schema = self.getExemple2Schema()(registry=registry)
-        data, errors = exemple2_schema.load(dump_data)
+        data = exemple2_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_dump_many2one(self):
         registry = self.init_registry(self.add_field_one2many)
         exemple2_schema = self.getExemple2Schema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple2_schema.dump(exemple2)
-        self.assertFalse(errors)
+        data = exemple2_schema.dump(exemple2)
         self.assertEqual(
             data,
             {
@@ -260,8 +252,7 @@ class TestField(DBTestCase):
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert()
         exemple2.exemple.append(exemple)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -280,8 +271,7 @@ class TestField(DBTestCase):
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert()
         exemple2.exemple.append(exemple)
-        data, errors = exemple2_schema.dump(exemple2)
-        self.assertFalse(errors)
+        data = exemple2_schema.dump(exemple2)
         self.assertEqual(
             data,
             {
@@ -308,9 +298,8 @@ class TestField(DBTestCase):
             ],
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_many2many_2(self):
         registry = self.init_registry(self.add_field_many2many)
@@ -326,9 +315,8 @@ class TestField(DBTestCase):
             ],
         }
         exemple2_schema = self.getExemple2Schema()(registry=registry)
-        data, errors = exemple2_schema.load(dump_data)
+        data = exemple2_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_many2many_1(self):
         registry = self.init_registry(self.add_field_many2many)

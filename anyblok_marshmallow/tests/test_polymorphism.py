@@ -64,8 +64,7 @@ class TestPolymorphism(DBTestCase):
         exemple_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple_schema.dump(exemple)
-        self.assertFalse(errors)
+        data = exemple_schema.dump(exemple)
         self.assertEqual(
             data,
             {
@@ -83,8 +82,7 @@ class TestPolymorphism(DBTestCase):
         exemple2_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
-        data, errors = exemple2_schema.dump(exemple2)
-        self.assertFalse(errors)
+        data = exemple2_schema.dump(exemple2)
         self.assertEqual(
             data,
             {
@@ -109,9 +107,8 @@ class TestPolymorphism(DBTestCase):
             'type': 'exemple',
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple_schema.load(dump_data)
+        data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_load_one2one_2(self):
         registry = self.init_registry(self.add_field_one2one)
@@ -125,9 +122,8 @@ class TestPolymorphism(DBTestCase):
             'type': 'exemple2',
         }
         exemple2_schema = self.getExempleSchema()(registry=registry)
-        data, errors = exemple2_schema.load(dump_data)
+        data = exemple2_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_one2one_1(self):
         registry = self.init_registry(self.add_field_one2one)

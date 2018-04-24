@@ -23,8 +23,7 @@ class TestPrimaryKey(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(data, {'id': customer.id})
 
     def test_load_only_primary_key_from_context(self):
@@ -54,8 +53,7 @@ class TestPrimaryKey(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(data, {'id': customer.id})
 
     def test_load_only_primary_key_from_init(self):
@@ -128,8 +126,7 @@ class TestPrimaryKey(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(data, {'id': customer.id})
 
     def test_load_only_primary_key_from_meta(self):
@@ -149,9 +146,8 @@ class TestPrimaryKey(DBTestCase):
 
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_only_primary_key_from_meta(self):
         registry = self.init_registry(add_complexe_model)

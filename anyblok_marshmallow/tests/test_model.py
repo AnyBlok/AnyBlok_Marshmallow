@@ -28,8 +28,7 @@ class TestModelSchema(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -56,9 +55,8 @@ class TestModelSchema(DBTestCase):
         }
         customer_schema = AnySchema(
             registry=registry, context={'model': "Model.Customer"})
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_model_from_context(self):
         registry = self.init_registry(add_complexe_model)
@@ -81,8 +79,7 @@ class TestModelSchema(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(customer)
-        self.assertFalse(errors)
+        data = customer_schema.dump(customer)
         self.assertEqual(
             data,
             {
@@ -109,9 +106,8 @@ class TestModelSchema(DBTestCase):
         }
         customer_schema = AnySchema(
             registry=registry, model="Model.Customer")
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_model_from_init(self):
         registry = self.init_registry(add_complexe_model)
@@ -133,9 +129,8 @@ class TestModelSchema(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(
+        data = customer_schema.dump(
             customer, registry=registry, model="Model.Customer")
-        self.assertFalse(errors)
         self.assertEqual(
             data,
             {
@@ -161,10 +156,9 @@ class TestModelSchema(DBTestCase):
             'name': 'test',
         }
         customer_schema = AnySchema()
-        data, errors = customer_schema.load(
+        data = customer_schema.load(
             dump_data, registry=registry, model="Model.Customer")
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_model_from_call(self):
         registry = self.init_registry(add_complexe_model)
