@@ -37,7 +37,7 @@ with open(
 
 requirements = [
     'anyblok',
-    'marshmallow',
+    'marshmallow --pre',
     'marshmallow-sqlalchemy',
 ]
 
