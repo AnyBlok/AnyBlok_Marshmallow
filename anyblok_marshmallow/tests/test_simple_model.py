@@ -7,6 +7,7 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_simple_model, ExempleSchema
+from marshmallow.exceptions import ValidationError
 
 
 class TestSimpleModel(DBTestCase):
@@ -50,9 +51,13 @@ class TestSimpleModel(DBTestCase):
         exemple_schema = ExempleSchema(
             partial=('name',), context={'registry': registry})
         exemple = registry.Exemple.insert(name="test")
-        data, errors = exemple_schema.load({'id': exemple.id, 'name': None})
-        self.assertEqual(errors, {'name': ['Field may not be null.']})
-        self.assertEqual(data, {'id': exemple.id})
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load({'id': exemple.id, 'name': None})
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'name': ['Field may not be null.']}
+        )
 
     def test_validate_simple_schema(self):
         registry = self.init_registry(add_simple_model)

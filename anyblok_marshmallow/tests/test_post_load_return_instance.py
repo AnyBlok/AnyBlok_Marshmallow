@@ -8,6 +8,7 @@
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model, CustomerSchema
 from anyblok_marshmallow import ModelSchema, PostLoadSchema
+from marshmallow.exceptions import ValidationError
 
 
 class ColumnSchema(PostLoadSchema, ModelSchema):

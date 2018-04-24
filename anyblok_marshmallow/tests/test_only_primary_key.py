@@ -31,9 +31,8 @@ class TestPrimaryKey(DBTestCase):
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
             registry=registry, context={'only_primary_key': True})
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_only_primary_key_from_context(self):
         registry = self.init_registry(add_complexe_model)
@@ -61,9 +60,8 @@ class TestPrimaryKey(DBTestCase):
         dump_data = {'id': 1}
         customer_schema = CustomerSchema(
             registry=registry, only_primary_key=True)
-        data, errors = customer_schema.load(dump_data)
+        data = customer_schema.load(dump_data)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_only_primary_key_from_init(self):
         registry = self.init_registry(add_complexe_model)
@@ -82,19 +80,17 @@ class TestPrimaryKey(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        data, errors = customer_schema.dump(
+        data = customer_schema.dump(
             customer, registry=registry, only_primary_key=True)
-        self.assertFalse(errors)
         self.assertEqual(data, {'id': customer.id})
 
     def test_load_only_primary_key_from_call(self):
         registry = self.init_registry(add_complexe_model)
         dump_data = {'id': 1}
         customer_schema = CustomerSchema()
-        data, errors = customer_schema.load(
+        data = customer_schema.load(
             dump_data, registry=registry, only_primary_key=True)
         self.assertEqual(data, dump_data)
-        self.assertFalse(errors)
 
     def test_validate_only_primary_key_from_call(self):
         registry = self.init_registry(add_complexe_model)

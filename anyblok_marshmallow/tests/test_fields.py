@@ -15,6 +15,7 @@ from anyblok.column import Integer, LargeBinary, Selection, Json, String
 from anyblok.field import Function
 from os import urandom
 from base64 import b64encode
+from marshmallow.exceptions import ValidationError
 
 
 class TestField(DBTestCase):

@@ -13,7 +13,7 @@ from anyblok.column import Integer
 from anyblok.relationship import One2One, Many2One, Many2Many
 
 
-class TestField(DBTestCase):
+class TestRelationShip(DBTestCase):
 
     def add_field_one2one(self):
 
