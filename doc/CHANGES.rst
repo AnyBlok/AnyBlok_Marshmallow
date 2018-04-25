@@ -12,6 +12,8 @@
 CHANGELOG
 =========
 
+* Migration of the code and unit test to marshmallow 3.0.0
+
 1.5.0
 -----
 
