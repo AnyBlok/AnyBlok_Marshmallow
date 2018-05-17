@@ -9,6 +9,7 @@ from marshmallow.exceptions import ValidationError
 from marshmallow.base import FieldABC
 from marshmallow.validate import OneOf
 from base64 import b64encode, b64decode
+from sqlalchemy_utils import PhoneNumber as PN
 from marshmallow.fields import (  # noqa
     Field,
     Raw,
@@ -160,3 +161,40 @@ class JsonCollection(Field):
             self.container._validate(value)
         finally:
             self.container.validators = validators
+
+
+class PhoneNumber(Field):
+
+    def __init__(self, region=None, *args, **kwargs):
+        self.region = region
+        super(PhoneNumber, self).__init__(*args, **kwargs)
+
+    def _serialize(self, value, attr, obj):
+        if value is not None:
+            return value.international
+
+        return value
+
+    def _deserialize(self, value, attr, data):
+        if value is not None:
+            region = self.context.get('region', self.region)
+            try:
+                return PN(value, region)
+            except Exception as e:
+                raise ValidationError(
+                    'The string supplied did not seem to be a phone number.'
+                )
+
+        return value
+
+    def _validate(self, value):
+        if value is None:
+            return
+
+        if isinstance(value, PN):
+            if not value.is_valid_number():
+                raise ValidationError({'valid': 'Is not a valid number'})
+        else:
+            raise ValidationError(
+                {'type': 'Invalid type to validate it %r' % type(value)}
+            )

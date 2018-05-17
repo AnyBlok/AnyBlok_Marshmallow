@@ -9,7 +9,6 @@
 from marshmallow import (
     Schema, post_load, SchemaOpts, validates_schema, validate
 )
-from marshmallow.fields import Raw
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
     ModelSchemaOpts as MSO
@@ -18,8 +17,9 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
-from .fields import Nested, Text
+from .fields import Raw, Nested, Text, Email, URL, PhoneNumber
 import sqlalchemy as sa
+import sqlalchemy_utils.types as sau
 
 
 def update_from_kwargs(*entries):
@@ -67,6 +67,9 @@ class ModelConverter(MC):
     SQLA_TYPE_MAPPING = MC.SQLA_TYPE_MAPPING.copy()
     SQLA_TYPE_MAPPING.update({
         sa.Text: Text,
+        sau.email.EmailType: Email,
+        sau.url.URLType: URL,
+        sau.phone_number.PhoneNumberType: PhoneNumber,
     })
 
     def fields_for_model(self, Model, **kwargs):
@@ -104,6 +107,13 @@ class ModelConverter(MC):
                     sch, many=many, only=RemoteModel.get_primary_keys())
 
         return fields
+
+    def _add_column_kwargs(self, kwargs, column):
+        super(ModelConverter, self)._add_column_kwargs(kwargs, column)
+        if isinstance(column.type, sau.phone_number.PhoneNumberType):
+            kwargs['region'] = column.type.region
+            kwargs['validate'] = [x for x in kwargs['validate']
+                                  if not isinstance(x, validate.Length)]
 
 
 class ModelSchemaOpts(SchemaOpts):

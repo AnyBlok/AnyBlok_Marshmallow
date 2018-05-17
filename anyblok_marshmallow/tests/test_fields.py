@@ -8,14 +8,32 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from anyblok_marshmallow import ModelSchema
-from anyblok_marshmallow.fields import Nested, File, JsonCollection
-from marshmallow import fields
+from anyblok_marshmallow import fields
 from anyblok import Declarations
-from anyblok.column import Integer, LargeBinary, Selection, Json, String
+from anyblok.column import (
+    Integer, LargeBinary, Selection, Json, String, Email, URL, UUID,
+    PhoneNumber)
 from anyblok.field import Function
 from os import urandom
 from base64 import b64encode
 from marshmallow.exceptions import ValidationError
+from uuid import uuid1
+from unittest import skipIf
+from sqlalchemy_utils import PhoneNumber as PN
+
+
+try:
+    import furl  # noqa
+    has_furl = True
+except Exception:
+    has_furl = False
+
+
+try:
+    import phonenumbers  # noqa
+    has_phonenumbers = True
+except Exception:
+    has_phonenumbers = False
 
 
 class TestField(DBTestCase):
@@ -231,7 +249,7 @@ class TestField(DBTestCase):
 
         class ExempleSchema(ModelSchema):
 
-            exemple2 = Nested(Exemple2Schema(only=('id',)))
+            exemple2 = fields.Nested(Exemple2Schema(only=('id',)))
 
             class Meta:
                 model = 'Model.Exemple'
@@ -247,7 +265,7 @@ class TestField(DBTestCase):
 
         class Exemple2Schema(ModelSchema):
 
-            exemple = Nested(ExempleSchema(only=('id',)))
+            exemple = fields.Nested(ExempleSchema(only=('id',)))
 
             class Meta:
                 model = 'Model.Exemple2'
@@ -258,7 +276,7 @@ class TestField(DBTestCase):
 
         class ExempleSchema(ModelSchema):
 
-            file = File()
+            file = fields.File()
 
             class Meta:
                 model = 'Model.Exemple'
@@ -343,7 +361,7 @@ class TestField(DBTestCase):
             class Meta:
                 model = 'Model.Exemple2'
 
-            name = JsonCollection(fieldname="properties", keys=['name'])
+            name = fields.JsonCollection(fieldname="properties", keys=['name'])
 
         return JsonCollectionSchema
 
@@ -355,7 +373,7 @@ class TestField(DBTestCase):
                 class Meta:
                     model = 'Model.Exemple2'
 
-                name = JsonCollection(
+                name = fields.JsonCollection(
                     fieldname="properties",
                     keys=['name'],
                     cls_or_instance_type=String  # this is an AnyBlok String
@@ -370,7 +388,7 @@ class TestField(DBTestCase):
                 class Meta:
                     model = 'Model.Exemple2'
 
-                name = JsonCollection(
+                name = fields.JsonCollection(
                     fieldname="properties",
                     keys=['name'],
                     cls_or_instance_type=String()  # this is an AnyBlok String
@@ -421,7 +439,7 @@ class TestField(DBTestCase):
             class Meta:
                 model = 'Model.Exemple2'
 
-            name = JsonCollection(
+            name = fields.JsonCollection(
                 fieldname="properties",
                 keys=['name'],
                 cls_or_instance_type=fields.String(required=True)
@@ -678,12 +696,12 @@ class TestField(DBTestCase):
             class Meta:
                 model = 'Model.Exemple3'
 
-            name1 = JsonCollection(
+            name1 = fields.JsonCollection(
                 fieldname="properties1",
                 keys=['sub', 'name'],
                 instance='theexemple1'
             )
-            name2 = JsonCollection(
+            name2 = fields.JsonCollection(
                 fieldname="properties2",
                 keys=['sub', 'sub', 'name'],
                 instance='theexemple2'
@@ -731,12 +749,12 @@ class TestField(DBTestCase):
             class Meta:
                 model = 'Model.Exemple2'
 
-            name1 = JsonCollection(
+            name1 = fields.JsonCollection(
                 fieldname="properties",
                 keys=['sub', 'name'],
                 instance='exemple1'
             )
-            name2 = JsonCollection(
+            name2 = fields.JsonCollection(
                 fieldname="properties",
                 keys=['sub', 'sub', 'name'],
                 instance='exemple2'
@@ -757,4 +775,258 @@ class TestField(DBTestCase):
                 'name1': ['Not a valid choice.'],
                 'name2': ['Not a valid choice.'],
             }
+        )
+
+    def add_field_email(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            email = Email()
+
+    def test_email_field_type(self):
+        registry = self.init_registry(self.add_field_email)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['email'], fields.Email))
+
+    def test_dump_email(self):
+        registry = self.init_registry(self.add_field_email)
+        exemple = registry.Exemple.insert(email='jssuzanne@anybox.fr')
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'email': "jssuzanne@anybox.fr",
+            }
+        )
+
+    def test_email_with_a_valid_email(self):
+        registry = self.init_registry(self.add_field_email)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'email': 'jssuzanne@anybox.fr'
+        }
+        load_data = exemple_schema.load(dump_data)
+        self.assertEqual(dump_data, load_data)
+
+    def test_email_with_an_invalid_email(self):
+        registry = self.init_registry(self.add_field_email)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'email': 'jssuzanne'
+        }
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'email': ['Not a valid email address.']}
+        )
+
+    def add_field_url(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            url = URL()
+
+    @skipIf(not has_furl, "furl is not installed")
+    def test_url_field_type(self):
+        registry = self.init_registry(self.add_field_url)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['url'], fields.URL))
+
+    @skipIf(not has_furl, "furl is not installed")
+    def test_dump_url(self):
+        registry = self.init_registry(self.add_field_url)
+        exemple = registry.Exemple.insert(url='https://doc.anyblok.org')
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'url': "https://doc.anyblok.org",
+            }
+        )
+
+    @skipIf(not has_furl, "furl is not installed")
+    def test_url_with_a_valid_url(self):
+        registry = self.init_registry(self.add_field_url)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'url': "https://doc.anyblok.org",
+        }
+        load_data = exemple_schema.load(dump_data)
+        self.assertEqual(dump_data, load_data)
+
+    @skipIf(not has_furl, "furl is not installed")
+    def test_url_with_an_invalid_url(self):
+        registry = self.init_registry(self.add_field_url)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'url': 'anyblok'
+        }
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'url': ['Not a valid URL.']}
+        )
+
+    def add_field_uuid(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            uuid = UUID()
+
+    def test_uuid_field_type(self):
+        registry = self.init_registry(self.add_field_uuid)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['uuid'], fields.UUID))
+
+    def test_dump_uuid(self):
+        registry = self.init_registry(self.add_field_uuid)
+        uuid = uuid1()
+        exemple = registry.Exemple.insert(uuid=uuid)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(data, {'id': exemple.id, 'uuid': str(uuid)})
+
+    def test_uuid_with_a_valid_uuid(self):
+        registry = self.init_registry(self.add_field_uuid)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        uuid = uuid1()
+        dump_data = {
+            'id': 1,
+            'uuid': str(uuid)
+        }
+        load_data = exemple_schema.load(dump_data)
+        self.assertEqual(load_data, {'id': 1, 'uuid': uuid})
+
+    def test_uuid_with_an_invalid_uuid(self):
+        registry = self.init_registry(self.add_field_uuid)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'uuid': 'jssuzanne'
+        }
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'uuid': ['Not a valid UUID.']}
+        )
+
+    def add_field_phonenumber(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            phonenumber = PhoneNumber()
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_phonenumber_field_type(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['phonenumber'],
+                       fields.PhoneNumber))
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_dump_phonenumber(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple = registry.Exemple.insert(phonenumber='+33953537297')
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'phonenumber': "+33 9 53 53 72 97",
+            }
+        )
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_phonenumber_with_a_valid_phonenumber(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'phonenumber': "09 53 53 72 97",
+        }
+        load_data = exemple_schema.load(dump_data)
+        pn = PN("+33953537297", None)
+        self.assertEqual(load_data, {'id': 1, 'phonenumber': pn})
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_phonenumber_with_a_valid_phonenumber_and_other_region(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple_schema = ModelSchema(
+            registry=registry,
+            context={'model': "Model.Exemple", "region": "GB"})
+        dump_data = {
+            'id': 1,
+            'phonenumber': "020 8366 1177",
+        }
+        load_data = exemple_schema.load(dump_data)
+        pn = PN("+442083661177", None)
+        self.assertEqual(load_data, {'id': 1, 'phonenumber': pn})
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_phonenumber_with_an_international_valid_phonenumber(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'phonenumber': "+33953537297",
+        }
+        load_data = exemple_schema.load(dump_data)
+        pn = PN("+33953537297", None)
+        self.assertEqual(load_data, {'id': 1, 'phonenumber': pn})
+
+    @skipIf(not has_phonenumbers, "phonenumbers is not installed")
+    def test_phonenumber_with_an_invalid_phonenumber(self):
+        registry = self.init_registry(self.add_field_phonenumber)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'phonenumber': 'anyblok'
+        }
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'phonenumber': [
+                'The string supplied did not seem to be a phone number.']}
         )

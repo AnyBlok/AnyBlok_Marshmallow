@@ -12,14 +12,17 @@
 CHANGELOG
 =========
 
-* Migration of the code and unit test to marshmallow 3.0.0
 
-1.5.0
+2.0.0
 -----
 
 * Add JsonCollection field, Allow to add a check in function of an collection
   stored in a AnyBlok.fields.Json
 * Add Text field, to represent an ``anyblok.column.Text``
+* Migration of the code and unit test to marshmallow 3.0.0
+* Add Email matching for ``anyblok.column.Email``
+* Add URL matching for ``anyblok.column.URL``
+* Add PhoneNumber matching for ``anyblok.column.PhoneNumber``
 
 1.4.0 (2018-04-07)
 ------------------
