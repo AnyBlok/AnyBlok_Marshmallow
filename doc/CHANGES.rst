@@ -23,6 +23,7 @@ CHANGELOG
 * Add Email matching for ``anyblok.column.Email``
 * Add URL matching for ``anyblok.column.URL``
 * Add PhoneNumber matching for ``anyblok.column.PhoneNumber``
+* Add Country matching for ``anyblok.column.Country``
 
 1.4.0 (2018-04-07)
 ------------------

@@ -9,4 +9,6 @@
 
 from .schema import ModelSchema, PostLoadSchema  # noqa
 from .exceptions import RegistryNotFound  # noqa
-from .fields import Nested, File, Text, JsonCollection, PhoneNumber  # noqa
+from .fields import (  # noqa
+    Nested, File, Text, JsonCollection, PhoneNumber, Country
+)

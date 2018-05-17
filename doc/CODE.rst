@@ -66,6 +66,26 @@ Fields
     :inherited-members:
 
 
+**PhoneNumer**
+--------------
+
+.. autoclass:: PhoneNumer
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+
+**Country**
+-----------
+
+.. autoclass:: Country
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+
 .. automodule:: anyblok_marshmallow.schema
 
 Schema

@@ -17,7 +17,8 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
-from .fields import Raw, Nested, Text, Email, URL, PhoneNumber
+from .fields import Raw, Nested, Text, Email, URL, PhoneNumber, Country
+import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
 
@@ -70,6 +71,7 @@ class ModelConverter(MC):
         sau.email.EmailType: Email,
         sau.url.URLType: URL,
         sau.phone_number.PhoneNumberType: PhoneNumber,
+        anyblok.column.CountryType: Country
     })
 
     def fields_for_model(self, Model, **kwargs):
@@ -112,8 +114,12 @@ class ModelConverter(MC):
         super(ModelConverter, self)._add_column_kwargs(kwargs, column)
         if isinstance(column.type, sau.phone_number.PhoneNumberType):
             kwargs['region'] = column.type.region
-            kwargs['validate'] = [x for x in kwargs['validate']
-                                  if not isinstance(x, validate.Length)]
+        elif isinstance(column.type, anyblok.column.CountryType):
+            import pycountry
+            choices = [x.alpha_3 for x in pycountry.countries]
+            labels = [x.name for x in pycountry.countries]
+            validators = kwargs.get('validate', [])
+            validators.append(validate.OneOf(choices, labels=labels))
 
 
 class ModelSchemaOpts(SchemaOpts):

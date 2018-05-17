@@ -12,7 +12,7 @@ from anyblok_marshmallow import fields
 from anyblok import Declarations
 from anyblok.column import (
     Integer, LargeBinary, Selection, Json, String, Email, URL, UUID,
-    PhoneNumber)
+    PhoneNumber, Country)
 from anyblok.field import Function
 from os import urandom
 from base64 import b64encode
@@ -34,6 +34,13 @@ try:
     has_phonenumbers = True
 except Exception:
     has_phonenumbers = False
+
+
+try:
+    import pycountry  # noqa
+    has_pycountry = True
+except Exception:
+    has_pycountry = False
 
 
 class TestField(DBTestCase):
@@ -1029,4 +1036,67 @@ class TestField(DBTestCase):
             exception.exception.messages,
             {'phonenumber': [
                 'The string supplied did not seem to be a phone number.']}
+        )
+
+    def add_field_country(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            country = Country()
+
+    @skipIf(not has_pycountry, "pycountry is not installed")
+    def test_country_field_type(self):
+        registry = self.init_registry(self.add_field_country)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['country'], fields.Country))
+
+    @skipIf(not has_pycountry, "pycountry is not installed")
+    def test_dump_country(self):
+        registry = self.init_registry(self.add_field_country)
+        exemple = registry.Exemple.insert(
+            country=pycountry.countries.get(alpha_2='FR'))
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'country': "FRA",
+            }
+        )
+
+    @skipIf(not has_pycountry, "pycountry is not installed")
+    def test_country_with_a_valid_country(self):
+        registry = self.init_registry(self.add_field_country)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'country': "FRA",
+        }
+        load_data = exemple_schema.load(dump_data)
+        self.assertEqual(
+            load_data,
+            {'id': 1, 'country': pycountry.countries.get(alpha_2='FR')}
+        )
+
+    @skipIf(not has_pycountry, "pycountry is not installed")
+    def test_country_with_an_invalid_country(self):
+        registry = self.init_registry(self.add_field_country)
+        exemple_schema = ModelSchema(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'country': 'ARF'
+        }
+        with self.assertRaises(ValidationError) as exception:
+            exemple_schema.load(dump_data)
+
+        self.assertEqual(
+            exception.exception.messages,
+            {'country': ['Not a valid country.']}
         )

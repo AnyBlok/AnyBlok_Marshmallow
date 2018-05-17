@@ -163,7 +163,7 @@ class JsonCollection(Field):
             self.container.validators = validators
 
 
-class PhoneNumber(Field):
+class PhoneNumber(String):
 
     def __init__(self, region=None, *args, **kwargs):
         self.region = region
@@ -198,3 +198,25 @@ class PhoneNumber(Field):
             raise ValidationError(
                 {'type': 'Invalid type to validate it %r' % type(value)}
             )
+
+
+class Country(String):
+
+    def _serialize(self, value, attr, obj):
+        if value is not None and not isinstance(value, str):
+            return value.alpha_3
+
+        return value
+
+    def _deserialize(self, value, attr, data):
+        if value is not None:
+            try:
+                import pycountry
+                return pycountry.countries.get(alpha_3=value)
+            except Exception as e:
+                raise ValidationError('Not a valid country.')
+
+        return value
+
+    def _validate(self, value):
+        return
