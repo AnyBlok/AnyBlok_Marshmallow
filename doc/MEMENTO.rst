@@ -314,6 +314,42 @@ or
     customer_schema.load(dump_data, only_primary_key=True)
     customer_schema.validate(dump_data, only_primary_key=True)
 
+
+**required_fields** option
+--------------------------
+
+This option force the generated fields, and only them to be requried.
+
+::
+
+    class CustomerSchema(ModelSchema):
+
+        class Meta:
+            model = "Model.Customer"
+            required_fields = True
+            # or required_fields = [ list of fieldname ]
+
+or
+
+::
+
+    customer_schema = CustomerSchema(required_fields=True)
+
+or
+
+::
+
+    customer_schema.context['required_fields'] = True
+
+or
+
+::
+
+    customer_schema.load(dump_data, required_fields=True)
+    customer_schema.validate(dump_data, required_fields=True)
+
+.. note:: All the attributes can take **True** or the list of the fieldname to be required
+
 Use the field JsonCollection
 ----------------------------
 

@@ -24,6 +24,7 @@ CHANGELOG
 * Add URL matching for ``anyblok.column.URL``
 * Add PhoneNumber matching for ``anyblok.column.PhoneNumber``
 * Add Country matching for ``anyblok.column.Country``
+* Add required_fields option
 
 1.4.0 (2018-04-07)
 ------------------
