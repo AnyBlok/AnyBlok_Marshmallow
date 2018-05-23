@@ -112,6 +112,14 @@ class ModelConverter(MC):
 
     def _add_column_kwargs(self, kwargs, column):
         super(ModelConverter, self)._add_column_kwargs(kwargs, column)
+        required_fields = self.schema_cls.Meta.required_fields
+        if (
+            (isinstance(required_fields, (tuple, list)) and
+             column.name in required_fields) or
+            required_fields is True
+        ):
+            kwargs['required'] = True
+
         if isinstance(column.type, sau.phone_number.PhoneNumberType):
             kwargs['region'] = column.type.region
         elif isinstance(column.type, anyblok.column.CountryType):
@@ -135,6 +143,7 @@ class ModelSchemaOpts(SchemaOpts):
         self.model = getattr(meta, 'model', False)
         self.registry = getattr(meta, 'registry', False)
         self.only_primary_key = getattr(meta, 'only_primary_key', False)
+        self.required_fields = getattr(meta, 'required_fields', None)
 
 
 class TemplateSchema:
@@ -245,12 +254,14 @@ class ModelSchema(Schema):
         registry = kwargs.pop('registry', None)
         only_primary_key = kwargs.pop('only_primary_key', None)
         model = kwargs.pop('model', None)
+        required_fields = kwargs.pop('required_fields', None)
         self.instances = kwargs.pop('instances', {})
         super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
         self.registry = registry or self.opts.registry
         self.model = model or self.opts.model
+        self.required_fields = required_fields or self.opts.required_fields
         self.only_primary_key = only_primary_key or self.opts.only_primary_key
 
     def get_registry(self):
@@ -267,12 +278,16 @@ class ModelSchema(Schema):
     def get_model(self):
         return self.context.get('model', self.model)
 
+    def get_required_fields(self):
+        return self.context.get('required_fields', self.required_fields)
+
     def generate_marsmallow_instance(self):
         """Generate the real mashmallow-sqlalchemy schema"""
         model = self.get_model()
         registry = self.get_registry()
         instances = self.context.get('instances', self.instances)
         only_primary_key = self.get_only_primary_key()
+        required_fields = self.get_required_fields()
 
         Schema = type(
             'Model.Schema.%s' % model,
@@ -285,6 +300,7 @@ class ModelSchema(Schema):
                         'model': registry.get(model),
                         'sqla_session': registry.Session,
                         'model_converter': ModelConverter,
+                        'required_fields': required_fields,
                     },
                 ),
             }
@@ -308,7 +324,8 @@ class ModelSchema(Schema):
         """property to get the real schema"""
         return self.generate_marsmallow_instance()
 
-    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
+                        'required_fields')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
@@ -318,7 +335,8 @@ class ModelSchema(Schema):
         """overload the main method to call in it in the real schema"""
         return self.schema.dump(*args, **kwargs)
 
-    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
+                        'required_fields')
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)
