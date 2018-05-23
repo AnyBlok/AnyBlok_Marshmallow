@@ -60,6 +60,15 @@ class Nested(FieldNested):
         self.__schema = None
         return super(Nested, self).schema
 
+    def _deserialize(self, value, attr, data):
+        if (
+            hasattr(value, '__registry_name__') and
+            self.nested.opts.model == value.__registry_name__
+        ):
+            return value
+
+        return super(Nested, self)._deserialize(value, attr, data)
+
 
 class File(Field):
 

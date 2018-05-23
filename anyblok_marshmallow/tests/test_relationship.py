@@ -318,6 +318,19 @@ class TestRelationShip(DBTestCase):
         data = exemple2_schema.load(dump_data)
         self.assertEqual(data, dump_data)
 
+    def test_load_many2many_3(self):
+        registry = self.init_registry(self.add_field_many2many)
+        exemple = registry.Exemple.insert()
+        exemple2 = registry.Exemple2.insert()
+        exemple2.exemple.append(exemple)
+        dump_data = {
+            'id': exemple2.id,
+            'exemple': exemple,
+        }
+        exemple2_schema = self.getExemple2Schema()(registry=registry)
+        data = exemple2_schema.load(dump_data)
+        self.assertEqual(data, dump_data)
+
     def test_validate_many2many_1(self):
         registry = self.init_registry(self.add_field_many2many)
         exemple = registry.Exemple.insert()
@@ -347,6 +360,19 @@ class TestRelationShip(DBTestCase):
                     'id': exemple.id,
                 },
             ],
+        }
+        exemple2_schema = self.getExemple2Schema()(registry=registry)
+        errors = exemple2_schema.validate(dump_data)
+        self.assertFalse(errors)
+
+    def test_validate_many2many_3(self):
+        registry = self.init_registry(self.add_field_many2many)
+        exemple = registry.Exemple.insert()
+        exemple2 = registry.Exemple2.insert()
+        exemple2.exemple.append(exemple)
+        dump_data = {
+            'id': exemple2.id,
+            'exemple': exemple,
         }
         exemple2_schema = self.getExemple2Schema()(registry=registry)
         errors = exemple2_schema.validate(dump_data)
