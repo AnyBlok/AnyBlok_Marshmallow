@@ -19,6 +19,9 @@ parts/
 bin/
 etc/
 develop-eggs/
+env/
+venv/
+virtualenv/
 
 gmon.out
 
