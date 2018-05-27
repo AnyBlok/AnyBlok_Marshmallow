@@ -229,3 +229,71 @@ class Country(String):
 
     def _validate(self, value):
         return
+
+
+class InstanceField(Field):
+    """Verify database record(s) exist for given model, column and value.
+
+    :param str model: The database model to query
+    :param key: The database column to query for `value`.
+    """
+
+    def __init__(self, cls_or_instance_type=String, model=None,
+                 key=None, *args, **kwargs):
+        self.model = model
+        self.key = key
+
+        if isinstance(cls_or_instance_type, type):
+            if not issubclass(cls_or_instance_type, FieldABC):
+                raise ValueError('The type of the list elements '
+                                 'must be a subclass of '
+                                 'marshmallow.base.FieldABC')
+            self.container = cls_or_instance_type()
+        else:
+            if not isinstance(cls_or_instance_type, FieldABC):
+                raise ValueError('The instances of the list '
+                                 'elements must be of type '
+                                 'marshmallow.base.FieldABC')
+            self.container = cls_or_instance_type
+
+        super(InstanceField, self).__init__(*args, **kwargs)
+
+    def _add_to_schema(self, field_name, schema):
+        super(InstanceField, self)._add_to_schema(field_name, schema)
+        self.container.parent = self
+        self.container.name = field_name
+
+    def _serialize(self, value, attr, obj):
+        return self.container._serialize(value, attr, obj)
+
+    def _deserialize(self, value, attr, data):
+        return self.container.deserialize(value, attr=attr, data=data)
+
+    def _validate(self, value):
+        registry = self.context['registry']
+        Model = registry.get(self.model)
+
+        if not value:
+            raise ValidationError("Field may not be null.")
+
+        if isinstance(self.container, List):
+            valid = Model.query(self.key).filter(
+                        getattr(Model, self.key).in_(
+                            [v for v in value if v])).all()
+            valid_list = [v[0] for v in valid]
+
+            if not valid_list:
+                raise ValidationError(
+                    "Records with key %r = %r on %r not found" %
+                    (self.key, value, Model))
+            if len(valid_list) != len(value):
+                delta = list(set(value) - set(valid_list))
+                raise ValidationError(
+                    "Records with key %r = %r on %r not found" %
+                    (self.key, delta, Model))
+        else:
+            record = Model.query().filter_by(**{self.key: value}).one_or_none()
+            if not record:
+                raise ValidationError(
+                        "Record with key %r = %r on %r not found" %
+                        (self.key, value, Model))
