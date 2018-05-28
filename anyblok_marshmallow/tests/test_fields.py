@@ -17,6 +17,7 @@ from anyblok.field import Function
 from os import urandom
 from base64 import b64encode
 from marshmallow.exceptions import ValidationError
+from marshmallow import Schema
 from uuid import uuid1
 from unittest import skipIf
 from sqlalchemy_utils import PhoneNumber as PN
@@ -1099,4 +1100,343 @@ class TestField(DBTestCase):
         self.assertEqual(
             exception.exception.messages,
             {'country': ['Not a valid country.']}
+        )
+
+    def add_field_instance_with_object(self):
+
+        @Declarations.register(Declarations.Model)
+        class Records:
+            id = Integer(primary_key=True)
+            uuid = UUID(default=uuid1)
+            code = String()
+            number = Integer()
+
+    def test_instance_field_str(self):
+        registry = self.init_registry(self.add_field_instance_with_object)
+        registry.Records.insert(code="code")
+
+        class TestSchema(Schema):
+            code = fields.InstanceField(
+                     cls_or_instance_type=fields.Str(),
+                     model='Model.Records', key='code')
+
+        sch = TestSchema(context={"registry": registry})
+
+        valid = sch.load(dict(code="code"))
+        self.assertEqual(
+            valid,
+            dict(code="code")
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code="unexisting"))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'code')[0].startswith("Record with")
+        )
+        self.assertTrue(
+            "'unexisting'" in exception.exception.messages.get('code')[0]
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=666))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('code')[0],
+            "Not a valid string."
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=uuid1()))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('code')[0],
+            "Not a valid string."
+        )
+
+    def test_instance_field_list_str(self):
+        registry = self.init_registry(self.add_field_instance_with_object)
+        for i in range(2):
+            registry.Records.insert(code="code%s" % i, number=i)
+
+        class TestSchema(Schema):
+            code = fields.InstanceField(
+                        cls_or_instance_type=fields.List(fields.Str()),
+                        model='Model.Records', key='code')
+
+        sch = TestSchema(context={"registry": registry})
+
+        valid = sch.load(dict(code=["code0", "code1"]))
+        self.assertEqual(
+            valid,
+            dict(code=["code0", "code1"])
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=["code0", "code1", "code2"]))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'code')[0].startswith("Records with")
+        )
+        self.assertTrue(
+            "'code2'" in exception.exception.messages.get('code')[0]
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=["code0", 666]))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('code').get(1)[0],
+            "Not a valid string."
+        )
+
+    def test_instance_field_other_types(self):
+        registry = self.init_registry(self.add_field_instance_with_object)
+        record = registry.Records.insert(number=100)
+
+        class TestSchema(Schema):
+            uuid = fields.InstanceField(
+                     cls_or_instance_type=fields.UUID(),
+                     model='Model.Records', key='uuid')
+            number = fields.InstanceField(
+                     cls_or_instance_type=fields.Int(),
+                     model='Model.Records', key='number')
+
+        sch = TestSchema(context={"registry": registry})
+
+        valid_uuid = sch.load(dict(uuid=record.uuid))
+
+        self.assertEqual(
+            valid_uuid,
+            dict(uuid=record.uuid)
+        )
+
+        unexisting_uuid = uuid1()
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(uuid=unexisting_uuid))
+
+        self.assertIn(
+            'uuid',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'uuid')[0].startswith("Record with")
+        )
+        self.assertTrue(
+            str(unexisting_uuid) in exception.exception.messages.get('uuid')[0]
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(uuid=666))
+
+        self.assertIn(
+            'uuid',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('uuid')[0],
+            "Not a valid UUID."
+        )
+
+        valid_number = sch.load(dict(number=record.number))
+
+        self.assertEqual(
+            valid_number,
+            dict(number=record.number)
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number="Nan"))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('number')[0],
+            "Not a valid integer."
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number=666))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'number')[0].startswith("Record with")
+        )
+        self.assertTrue(
+            repr(666) in exception.exception.messages.get('number')[0]
+        )
+
+    def test_instance_field_list_other_types(self):
+        registry = self.init_registry(self.add_field_instance_with_object)
+        valid_uuids = []
+        for i in range(1, 3):
+            rec = registry.Records.insert(number=i*100)
+            valid_uuids.append(rec.uuid)
+
+        class TestSchema(Schema):
+            uuid = fields.InstanceField(
+                        cls_or_instance_type=fields.List(fields.UUID()),
+                        model='Model.Records', key='uuid')
+            number = fields.InstanceField(
+                        cls_or_instance_type=fields.List(fields.Int()),
+                        model='Model.Records', key='number')
+
+        sch = TestSchema(context={"registry": registry})
+        valid = sch.load(dict(uuid=valid_uuids))
+        self.assertEqual(
+            valid,
+            dict(uuid=valid_uuids)
+        )
+
+        invalid_uuids = [uuid1(), uuid1()]
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(uuid=invalid_uuids))
+
+        self.assertIn(
+            'uuid',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'uuid')[0].startswith("Records with")
+        )
+        self.assertTrue(
+            repr(invalid_uuids) in exception.exception.messages.get('uuid')[0]
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(uuid=[valid_uuids[0], 666]))
+
+        self.assertIn(
+            'uuid',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('uuid')[1][0],
+            "Not a valid UUID."
+        )
+
+        valid_numbers = sch.load(dict(number=[100, 200]))
+        self.assertEqual(
+            valid_numbers,
+            dict(number=[100, 200])
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number=[666, 999]))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertTrue(
+            exception.exception.messages.get(
+                'number')[0].startswith("Records with")
+        )
+        self.assertTrue(
+            repr([666, 999]) in exception.exception.messages.get('number')[0]
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number=["NAN", 666]))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('number')[0][0],
+            "Not a valid integer."
+        )
+
+    def test_instance_field_no_records(self):
+        registry = self.init_registry(self.add_field_instance_with_object)
+        for i in range(2):
+            registry.Records.insert(code="code%s" % i, number=i)
+
+        class TestSchema(Schema):
+            code = fields.InstanceField(
+                        cls_or_instance_type=fields.Str(),
+                        model='Model.Records', key='code')
+            number = fields.InstanceField(
+                        cls_or_instance_type=fields.List(fields.Int()),
+                        model='Model.Records', key='number')
+
+        sch = TestSchema(context={"registry": registry})
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=None))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('code')[0],
+            "Field may not be null."
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(code=""))
+
+        self.assertIn(
+            'code',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('code')[0],
+            "Field may not be null."
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number=[None]))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('number')[0][0],
+            "Field may not be null."
+        )
+
+        with self.assertRaises(ValidationError) as exception:
+            sch.load(dict(number=[""]))
+
+        self.assertIn(
+            'number',
+            exception.exception.messages.keys()
+        )
+        self.assertEqual(
+            exception.exception.messages.get('number')[0][0],
+            "Not a valid integer."
         )

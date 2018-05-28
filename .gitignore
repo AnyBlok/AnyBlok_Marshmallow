@@ -14,11 +14,15 @@ doc/_build
 *~
 *.orig
 *.DS_Store
+*.noseids
 
 parts/
 bin/
 etc/
 develop-eggs/
+env/
+venv/
+virtualenv/
 
 gmon.out
 
