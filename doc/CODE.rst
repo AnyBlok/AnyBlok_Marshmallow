@@ -85,6 +85,15 @@ Fields
     :show-inheritance:
     :inherited-members:
 
+**InstanceField**
+-----------------
+
+.. autoclass:: Country
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
 
 .. automodule:: anyblok_marshmallow.schema
 

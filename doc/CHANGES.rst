@@ -13,8 +13,8 @@ CHANGELOG
 =========
 
 
-2.0.0
------
+2.0.0 (2018-05-30)
+------------------
 
 * Add JsonCollection field, Allow to add a check in function of an collection
   stored in a AnyBlok.fields.Json
@@ -25,6 +25,7 @@ CHANGELOG
 * Add PhoneNumber matching for ``anyblok.column.PhoneNumber``
 * Add Country matching for ``anyblok.column.Country``
 * Add required_fields option
+* Add InstanceField
 
 1.4.0 (2018-04-07)
 ------------------
