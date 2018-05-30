@@ -248,38 +248,6 @@ class TestField(DBTestCase):
         errors = exemple_schema.validate(dump_data)
         self.assertEqual(errors, {'name': ['Not a valid choice.']})
 
-    def getExempleSchema(self):
-
-        class Exemple2Schema(ModelSchema):
-
-            class Meta:
-                model = 'Model.Exemple2'
-
-        class ExempleSchema(ModelSchema):
-
-            exemple2 = fields.Nested(Exemple2Schema(only=('id',)))
-
-            class Meta:
-                model = 'Model.Exemple'
-
-        return ExempleSchema
-
-    def getExemple2Schema(self):
-
-        class ExempleSchema(ModelSchema):
-
-            class Meta:
-                model = 'Model.Exemple'
-
-        class Exemple2Schema(ModelSchema):
-
-            exemple = fields.Nested(ExempleSchema(only=('id',)))
-
-            class Meta:
-                model = 'Model.Exemple2'
-
-        return Exemple2Schema
-
     def getExempleSchemaLO(self):
 
         class ExempleSchema(ModelSchema):
