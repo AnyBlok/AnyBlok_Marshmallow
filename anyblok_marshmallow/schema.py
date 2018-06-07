@@ -119,6 +119,7 @@ class ModelConverter(MC):
             required_fields is True
         ):
             kwargs['required'] = True
+            kwargs['allow_none'] = False
 
         if isinstance(column.type, sau.phone_number.PhoneNumberType):
             kwargs['region'] = column.type.region

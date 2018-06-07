@@ -12,6 +12,10 @@
 CHANGELOG
 =========
 
+2.0.1 (2018-06-07)
+------------------
+
+* Fix required_field put allow_none to False
 
 2.0.0 (2018-05-30)
 ------------------
