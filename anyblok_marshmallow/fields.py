@@ -179,7 +179,7 @@ class PhoneNumber(String):
         super(PhoneNumber, self).__init__(*args, **kwargs)
 
     def _serialize(self, value, attr, obj):
-        if value is not None:
+        if value is not None and isinstance(value, PN):
             return value.international
 
         return value
@@ -197,7 +197,7 @@ class PhoneNumber(String):
         return value
 
     def _validate(self, value):
-        if value is None:
+        if not value:
             return
 
         if isinstance(value, PN):
