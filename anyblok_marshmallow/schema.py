@@ -265,12 +265,6 @@ class ModelSchema(Schema):
         self.required_fields = required_fields or self.opts.required_fields
         self.only_primary_key = only_primary_key or self.opts.only_primary_key
 
-    def _update_fields(self, obj=None, many=False):
-        if obj is not None:
-            return super(ModelSchema, self)._update_fields(obj=obj, many=many)
-
-        return {}
-
     def get_registry(self):
         registry = self.context.get('registry', self.registry)
         if not registry:
