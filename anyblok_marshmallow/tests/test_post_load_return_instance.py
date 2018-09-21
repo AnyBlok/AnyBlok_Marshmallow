@@ -7,21 +7,22 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model, CustomerSchema
-from anyblok_marshmallow import ModelSchema, PostLoadSchema
+from anyblok_marshmallow import SchemaWrapper, PostLoadSchema
 from marshmallow.exceptions import ValidationError
 
 
-class ColumnSchema(PostLoadSchema, ModelSchema):
+class ColumnSchema(SchemaWrapper):
+    model = "Model.System.Column"
 
-    class Meta:
-        model = "Model.System.Column"
+    class Schema(PostLoadSchema):
+        pass
 
 
-class ColumnSchema2(PostLoadSchema, ModelSchema):
-    post_load_attributes = ['model', 'name']
+class ColumnSchema2(SchemaWrapper):
+    model = "Model.System.Column"
 
-    class Meta:
-        model = "Model.System.Column"
+    class Schema(PostLoadSchema):
+        post_load_attributes = ['model', 'name']
 
 
 class PostLoadCustomSchema(CustomerSchema, PostLoadSchema):

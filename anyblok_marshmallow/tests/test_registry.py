@@ -7,7 +7,7 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model, CustomerSchema, AddressSchema, TagSchema
-from anyblok_marshmallow import ModelSchema, RegistryNotFound
+from anyblok_marshmallow import SchemaWrapper, RegistryNotFound
 from marshmallow import fields
 
 
@@ -284,15 +284,14 @@ class TestRegistry(DBTestCase):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
-        class CustomerSchema(ModelSchema):
+        class CustomerSchema(SchemaWrapper):
+            model = 'Model.Customer'
+            registry = self.registry
 
-            addresses = fields.Nested(
-                AddressSchema, many=True, exclude=('customer', ))
-            tags = fields.Nested(TagSchema, many=True)
-
-            class Meta:
-                model = 'Model.Customer'
-                registry = self.registry
+            class Schema:
+                addresses = fields.Nested(
+                    AddressSchema, many=True, exclude=('customer', ))
+                tags = fields.Nested(TagSchema, many=True)
 
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
@@ -331,15 +330,14 @@ class TestRegistry(DBTestCase):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
-        class CustomerSchema(ModelSchema):
+        class CustomerSchema(SchemaWrapper):
+            model = 'Model.Customer'
+            registry = self.registry
 
-            addresses = fields.Nested(
-                AddressSchema, many=True, exclude=('customer', ))
-            tags = fields.Nested(TagSchema, many=True)
-
-            class Meta:
-                model = 'Model.Customer'
-                registry = self.registry
+            class Schema:
+                addresses = fields.Nested(
+                    AddressSchema, many=True, exclude=('customer', ))
+                tags = fields.Nested(TagSchema, many=True)
 
         dump_data = {
             'id': 1,
@@ -370,15 +368,14 @@ class TestRegistry(DBTestCase):
         registry = self.init_registry(add_complexe_model)
         self.registry = registry
 
-        class CustomerSchema(ModelSchema):
+        class CustomerSchema(SchemaWrapper):
+            model = 'Model.Customer'
+            registry = self.registry
 
-            addresses = fields.Nested(
-                AddressSchema, many=True, exclude=('customer', ))
-            tags = fields.Nested(TagSchema, many=True)
-
-            class Meta:
-                model = 'Model.Customer'
-                registry = self.registry
+            class Schema:
+                addresses = fields.Nested(
+                    AddressSchema, many=True, exclude=('customer', ))
+                tags = fields.Nested(TagSchema, many=True)
 
         dump_data = {
             'id': 1,

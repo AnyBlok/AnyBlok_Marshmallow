@@ -241,14 +241,17 @@ class PostLoadSchema:
 class SchemaWrapper(SchemaABC):
     model = None
     required_fields = None
+    registry = None
+    only_primary_key = None
 
     class Schema:
         pass
 
     def __init__(self, *args, **kwargs):
-        self.registry = kwargs.pop('registry', None)
+        self.registry = kwargs.pop('registry', self.registry)
         self.context = kwargs.pop('context', {})
-        self.only_primary_key = kwargs.pop('only_primary_key', None)
+        self.only_primary_key = kwargs.pop(
+            'only_primary_key', self.only_primary_key)
         self.model = kwargs.pop('model', self.model)
 
         self.required_fields = kwargs.pop(

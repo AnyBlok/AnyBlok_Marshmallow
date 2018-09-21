@@ -7,11 +7,9 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model
-from anyblok_marshmallow import ModelSchema, fields
+from anyblok_marshmallow import SchemaWrapper, fields
 from anyblok.column import Integer, Text
 from anyblok import Declarations
-
-from anyblok_marshmallow.schema import SchemaWrapper
 
 
 class AnySchema(SchemaWrapper):
@@ -202,9 +200,8 @@ class TestModelSchema(DBTestCase):
 
         registry = self.init_registry(add_in_registry)
 
-        class ExempleSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple'
+        class ExempleSchema(SchemaWrapper):
+            model = 'Model.Exemple'
 
         schema = ExempleSchema(registry=registry).schema
         field = schema.fields['name']

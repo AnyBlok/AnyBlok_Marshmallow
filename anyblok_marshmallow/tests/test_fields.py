@@ -7,7 +7,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import SchemaWrapper
 from anyblok_marshmallow import fields
 from anyblok import Declarations
 from anyblok.column import (
@@ -84,7 +84,7 @@ class TestField(DBTestCase):
 
     def test_dump_function(self):
         registry = self.init_registry(self.add_field_function)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
@@ -103,7 +103,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'test',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
@@ -114,14 +114,14 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'test',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
         self.assertFalse(errors)
 
     def test_dump_selection_with_object(self):
         registry = self.init_registry(self.add_field_selection_with_object)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
@@ -140,7 +140,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
@@ -151,7 +151,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'wrong_value',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         with self.assertRaises(ValidationError) as exception:
             exemple_schema.load(dump_data)
@@ -167,7 +167,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
         self.assertFalse(errors)
@@ -178,14 +178,14 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'wrong_value',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
         self.assertEqual(errors, {'name': ['Not a valid choice.']})
 
     def test_dump_selection_with_classmethod(self):
         registry = self.init_registry(self.add_field_selection_with_classmethod)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
 
         exemple = registry.Exemple.insert()
@@ -204,7 +204,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.load(dump_data)
         self.assertEqual(data, dump_data)
@@ -215,7 +215,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'wrong_value',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
 
         with self.assertRaises(ValidationError) as exception:
@@ -232,7 +232,7 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'foo',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
         self.assertFalse(errors)
@@ -243,19 +243,18 @@ class TestField(DBTestCase):
             'id': 1,
             'name': 'wrong_value',
         }
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
         self.assertEqual(errors, {'name': ['Not a valid choice.']})
 
     def getExempleSchemaLO(self):
 
-        class ExempleSchema(ModelSchema):
+        class ExempleSchema(SchemaWrapper):
+            model = 'Model.Exemple'
 
-            file = fields.File()
-
-            class Meta:
-                model = 'Model.Exemple'
+            class Schema:
+                file = fields.File()
 
         return ExempleSchema
 
@@ -333,11 +332,12 @@ class TestField(DBTestCase):
     @property
     def getJsonPropertySchema1(self):
 
-        class JsonCollectionSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple2'
+        class JsonCollectionSchema(SchemaWrapper):
+            model = 'Model.Exemple2'
 
-            name = fields.JsonCollection(fieldname="properties", keys=['name'])
+            class Schema:
+                name = fields.JsonCollection(
+                    fieldname="properties", keys=['name'])
 
         return JsonCollectionSchema
 
@@ -345,31 +345,32 @@ class TestField(DBTestCase):
         self.init_registry(self.add_field_json_collection_property)
 
         with self.assertRaises(ValueError):
-            class JsonCollectionSchema(ModelSchema):
-                class Meta:
-                    model = 'Model.Exemple2'
+            class JsonCollectionSchema(SchemaWrapper):
+                model = 'Model.Exemple2'
 
-                name = fields.JsonCollection(
-                    fieldname="properties",
-                    keys=['name'],
-                    cls_or_instance_type=String  # this is an AnyBlok String
-                                                 # not a marshmallow String
-                )
+                class Schema:
+                    name = fields.JsonCollection(
+                        fieldname="properties",
+                        keys=['name'],
+                        cls_or_instance_type=String  # this is an AnyBlok String
+                                                     # not a marshmallow String
+                    )
 
     def test_json_collection_wrong_field_instance_type(self):
         self.init_registry(self.add_field_json_collection_property)
 
         with self.assertRaises(ValueError):
-            class JsonCollectionSchema(ModelSchema):
-                class Meta:
-                    model = 'Model.Exemple2'
+            class JsonCollectionSchema(SchemaWrapper):
+                model = 'Model.Exemple2'
 
-                name = fields.JsonCollection(
-                    fieldname="properties",
-                    keys=['name'],
-                    cls_or_instance_type=String()  # this is an AnyBlok String
-                                                   # not a marshmallow String
-                )
+                class Schema:
+                    name = fields.JsonCollection(
+                        fieldname="properties",
+                        keys=['name'],
+                        cls_or_instance_type=String()
+                        # this is an AnyBlok String
+                        # not a marshmallow String
+                    )
 
     def test_dump_json_collection_list(self):
         registry = self.init_registry(self.add_field_json_collection_property)
@@ -411,15 +412,15 @@ class TestField(DBTestCase):
         exemple = registry.Exemple.insert(properties={'name': ['foo', 'bar']})
         exemple2 = registry.Exemple2.insert(name='foo')
 
-        class JsonCollectionSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple2'
+        class JsonCollectionSchema(SchemaWrapper):
+            model = 'Model.Exemple2'
 
-            name = fields.JsonCollection(
-                fieldname="properties",
-                keys=['name'],
-                cls_or_instance_type=fields.String(required=True)
-            )
+            class Schema:
+                name = fields.JsonCollection(
+                    fieldname="properties",
+                    keys=['name'],
+                    cls_or_instance_type=fields.String(required=True)
+                )
 
         exemple_schema = JsonCollectionSchema(registry=registry)
         data = exemple_schema.dump(
@@ -668,20 +669,20 @@ class TestField(DBTestCase):
                 'name': {'foo2': 'Foo 2', 'bar2': 'Bar 2'}}}})
         exemple3 = registry.Exemple3.insert(name1='foo', name2='foo2')
 
-        class JsonCollectionSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple3'
+        class JsonCollectionSchema(SchemaWrapper):
+            model = 'Model.Exemple3'
 
-            name1 = fields.JsonCollection(
-                fieldname="properties1",
-                keys=['sub', 'name'],
-                instance='theexemple1'
-            )
-            name2 = fields.JsonCollection(
-                fieldname="properties2",
-                keys=['sub', 'sub', 'name'],
-                instance='theexemple2'
-            )
+            class Schema:
+                name1 = fields.JsonCollection(
+                    fieldname="properties1",
+                    keys=['sub', 'name'],
+                    instance='theexemple1'
+                )
+                name2 = fields.JsonCollection(
+                    fieldname="properties2",
+                    keys=['sub', 'sub', 'name'],
+                    instance='theexemple2'
+                )
 
         exemple_schema = JsonCollectionSchema(registry=registry)
         errors = exemple_schema.validate(
@@ -721,20 +722,20 @@ class TestField(DBTestCase):
                 'name': {'foo2': 'Foo 2', 'bar2': 'Bar 2'}}}})
         exemple3 = registry.Exemple3.insert(name1='foo', name2='foo2')
 
-        class JsonCollectionSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple2'
+        class JsonCollectionSchema(SchemaWrapper):
+            model = 'Model.Exemple2'
 
-            name1 = fields.JsonCollection(
-                fieldname="properties",
-                keys=['sub', 'name'],
-                instance='exemple1'
-            )
-            name2 = fields.JsonCollection(
-                fieldname="properties",
-                keys=['sub', 'sub', 'name'],
-                instance='exemple2'
-            )
+            class Schema:
+                name1 = fields.JsonCollection(
+                    fieldname="properties",
+                    keys=['sub', 'name'],
+                    instance='exemple1'
+                )
+                name2 = fields.JsonCollection(
+                    fieldname="properties",
+                    keys=['sub', 'sub', 'name'],
+                    instance='exemple2'
+                )
 
         exemple_schema = JsonCollectionSchema(registry=registry)
         errors = exemple_schema.validate(
@@ -762,7 +763,7 @@ class TestField(DBTestCase):
 
     def test_email_field_type(self):
         registry = self.init_registry(self.add_field_email)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         self.assertTrue(
             isinstance(exemple_schema.schema.fields['email'], fields.Email))
@@ -770,7 +771,7 @@ class TestField(DBTestCase):
     def test_dump_email(self):
         registry = self.init_registry(self.add_field_email)
         exemple = registry.Exemple.insert(email='jssuzanne@anybox.fr')
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.dump(exemple)
         self.assertEqual(
@@ -783,7 +784,7 @@ class TestField(DBTestCase):
 
     def test_email_with_a_valid_email(self):
         registry = self.init_registry(self.add_field_email)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -794,7 +795,7 @@ class TestField(DBTestCase):
 
     def test_email_with_an_invalid_email(self):
         registry = self.init_registry(self.add_field_email)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -818,7 +819,7 @@ class TestField(DBTestCase):
     @skipIf(not has_furl, "furl is not installed")
     def test_url_field_type(self):
         registry = self.init_registry(self.add_field_url)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         self.assertTrue(
             isinstance(exemple_schema.schema.fields['url'], fields.URL))
@@ -827,7 +828,7 @@ class TestField(DBTestCase):
     def test_dump_url(self):
         registry = self.init_registry(self.add_field_url)
         exemple = registry.Exemple.insert(url='https://doc.anyblok.org')
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.dump(exemple)
         self.assertEqual(
@@ -841,7 +842,7 @@ class TestField(DBTestCase):
     @skipIf(not has_furl, "furl is not installed")
     def test_url_with_a_valid_url(self):
         registry = self.init_registry(self.add_field_url)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -853,7 +854,7 @@ class TestField(DBTestCase):
     @skipIf(not has_furl, "furl is not installed")
     def test_url_with_an_invalid_url(self):
         registry = self.init_registry(self.add_field_url)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -876,7 +877,7 @@ class TestField(DBTestCase):
 
     def test_uuid_field_type(self):
         registry = self.init_registry(self.add_field_uuid)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         self.assertTrue(
             isinstance(exemple_schema.schema.fields['uuid'], fields.UUID))
@@ -885,14 +886,14 @@ class TestField(DBTestCase):
         registry = self.init_registry(self.add_field_uuid)
         uuid = uuid1()
         exemple = registry.Exemple.insert(uuid=uuid)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.dump(exemple)
         self.assertEqual(data, {'id': exemple.id, 'uuid': str(uuid)})
 
     def test_uuid_with_a_valid_uuid(self):
         registry = self.init_registry(self.add_field_uuid)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         uuid = uuid1()
         dump_data = {
@@ -904,7 +905,7 @@ class TestField(DBTestCase):
 
     def test_uuid_with_an_invalid_uuid(self):
         registry = self.init_registry(self.add_field_uuid)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -928,7 +929,7 @@ class TestField(DBTestCase):
     @skipIf(not has_phonenumbers, "phonenumbers is not installed")
     def test_phonenumber_field_type(self):
         registry = self.init_registry(self.add_field_phonenumber)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         self.assertTrue(
             isinstance(exemple_schema.schema.fields['phonenumber'],
@@ -938,7 +939,7 @@ class TestField(DBTestCase):
     def test_dump_phonenumber(self):
         registry = self.init_registry(self.add_field_phonenumber)
         exemple = registry.Exemple.insert(phonenumber='+33953537297')
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.dump(exemple)
         self.assertEqual(
@@ -952,7 +953,7 @@ class TestField(DBTestCase):
     @skipIf(not has_phonenumbers, "phonenumbers is not installed")
     def test_phonenumber_with_a_valid_phonenumber(self):
         registry = self.init_registry(self.add_field_phonenumber)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -965,7 +966,7 @@ class TestField(DBTestCase):
     @skipIf(not has_phonenumbers, "phonenumbers is not installed")
     def test_phonenumber_with_a_valid_phonenumber_and_other_region(self):
         registry = self.init_registry(self.add_field_phonenumber)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry,
             context={'model': "Model.Exemple", "region": "GB"})
         dump_data = {
@@ -979,7 +980,7 @@ class TestField(DBTestCase):
     @skipIf(not has_phonenumbers, "phonenumbers is not installed")
     def test_phonenumber_with_an_international_valid_phonenumber(self):
         registry = self.init_registry(self.add_field_phonenumber)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -992,7 +993,7 @@ class TestField(DBTestCase):
     @skipIf(not has_phonenumbers, "phonenumbers is not installed")
     def test_phonenumber_with_an_invalid_phonenumber(self):
         registry = self.init_registry(self.add_field_phonenumber)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -1017,7 +1018,7 @@ class TestField(DBTestCase):
     @skipIf(not has_pycountry, "pycountry is not installed")
     def test_country_field_type(self):
         registry = self.init_registry(self.add_field_country)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         self.assertTrue(
             isinstance(exemple_schema.schema.fields['country'], fields.Country))
@@ -1027,7 +1028,7 @@ class TestField(DBTestCase):
         registry = self.init_registry(self.add_field_country)
         exemple = registry.Exemple.insert(
             country=pycountry.countries.get(alpha_2='FR'))
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         data = exemple_schema.dump(exemple)
         self.assertEqual(
@@ -1041,7 +1042,7 @@ class TestField(DBTestCase):
     @skipIf(not has_pycountry, "pycountry is not installed")
     def test_country_with_a_valid_country(self):
         registry = self.init_registry(self.add_field_country)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,
@@ -1056,7 +1057,7 @@ class TestField(DBTestCase):
     @skipIf(not has_pycountry, "pycountry is not installed")
     def test_country_with_an_invalid_country(self):
         registry = self.init_registry(self.add_field_country)
-        exemple_schema = ModelSchema(
+        exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         dump_data = {
             'id': 1,

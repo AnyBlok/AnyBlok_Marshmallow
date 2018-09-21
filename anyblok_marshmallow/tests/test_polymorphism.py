@@ -6,7 +6,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import SchemaWrapper
 from anyblok_marshmallow.fields import Nested
 from anyblok import Declarations
 from anyblok.column import Integer, String
@@ -44,18 +44,15 @@ class TestPolymorphism(DBTestCase):
 
     def getExempleSchema(self):
 
-        class Exemple2Schema(ModelSchema):
+        class Exemple2Schema(SchemaWrapper):
+            model = 'Model.Exemple'
 
-            class Meta:
-                model = 'Model.Exemple'
+        class ExempleSchema(SchemaWrapper):
+            model = 'Model.Exemple'
 
-        class ExempleSchema(ModelSchema):
-
-            exemple2 = Nested(Exemple2Schema(only=('id',)))
-            exemple = Nested(Exemple2Schema(only=('id',)))
-
-            class Meta:
-                model = 'Model.Exemple'
+            class Schema:
+                exemple2 = Nested(Exemple2Schema(only=('id',)))
+                exemple = Nested(Exemple2Schema(only=('id',)))
 
         return ExempleSchema
 
