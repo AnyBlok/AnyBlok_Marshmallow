@@ -7,7 +7,7 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_simple_model, ExempleSchema
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import SchemaWrapper
 
 
 class TestRequired(DBTestCase):
@@ -15,10 +15,9 @@ class TestRequired(DBTestCase):
     def test_schema_with_required_in_meta(self):
         registry = self.init_registry(add_simple_model)
 
-        class MySchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple'
-                required_fields = True
+        class MySchema(SchemaWrapper):
+            model = 'Model.Exemple'
+            required_fields = True
 
         exemple_schema = MySchema(registry=registry)
         fields = exemple_schema.schema.fields
@@ -29,10 +28,9 @@ class TestRequired(DBTestCase):
     def test_schema_with_required_list_in_meta(self):
         registry = self.init_registry(add_simple_model)
 
-        class MySchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple'
-                required_fields = ['name', 'number']
+        class MySchema(SchemaWrapper):
+            model = 'Model.Exemple'
+            required_fields = ['name', 'number']
 
         exemple_schema = MySchema(registry=registry)
         fields = exemple_schema.schema.fields

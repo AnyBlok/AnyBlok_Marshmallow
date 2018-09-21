@@ -11,8 +11,10 @@ from anyblok_marshmallow import ModelSchema, fields
 from anyblok.column import Integer, Text
 from anyblok import Declarations
 
+from anyblok_marshmallow.schema import SchemaWrapper
 
-class AnySchema(ModelSchema):
+
+class AnySchema(SchemaWrapper):
     pass
 
 

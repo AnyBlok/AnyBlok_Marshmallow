@@ -6,9 +6,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from marshmallow import (
-    Schema, post_load, SchemaOpts, validates_schema, validate
-)
+from marshmallow import post_load, SchemaOpts, validates_schema, validate
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
     ModelSchemaOpts as MSO
@@ -21,6 +19,7 @@ from .fields import Raw, Nested, Text, Email, URL, PhoneNumber, Country
 import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
+from marshmallow.base import SchemaABC
 
 
 def update_from_kwargs(*entries):
@@ -101,8 +100,8 @@ class ModelConverter(MC):
 
                 sch = type(
                     'Model.Schema.' + remote_model,
-                    (ModelSchema,),
-                    {'Meta': type('Meta', tuple(), {'model': remote_model})}
+                    (SchemaWrapper,),
+                    {'model': remote_model}
                 )
 
                 fields[field] = Nested(
@@ -149,10 +148,6 @@ class ModelSchemaOpts(SchemaOpts):
 
 class TemplateSchema:
     OPTIONS_CLASS = MSO
-    __init__ = MS.__init__
-    load = MS.load
-    dump = MS.dump
-    validate = MS.validate
 
     @validates_schema(pass_original=True)
     def check_unknown_fields(self, data, original_data):
@@ -243,56 +238,39 @@ class PostLoadSchema:
         return data
 
 
-class ModelSchema(Schema):
-    """A marshmallow schema based on the AnyBlok Model
+class SchemaWrapper(SchemaABC):
+    model = None
+    required_fields = None
 
-    Wrap the real schema, because at the instanciation
-    the registry is not available
-    """
-    OPTIONS_CLASS = ModelSchemaOpts
+    class Schema:
+        pass
 
     def __init__(self, *args, **kwargs):
-        registry = kwargs.pop('registry', None)
-        only_primary_key = kwargs.pop('only_primary_key', None)
-        model = kwargs.pop('model', None)
-        required_fields = kwargs.pop('required_fields', None)
+        self.registry = kwargs.pop('registry', None)
+        self.context = kwargs.pop('context', {})
+        self.only_primary_key = kwargs.pop('only_primary_key', None)
+        self.model = kwargs.pop('model', self.model)
+
+        self.required_fields = kwargs.pop(
+            'required_fields', self.required_fields)
         self.instances = kwargs.pop('instances', {})
-        super(ModelSchema, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
-        self.registry = registry or self.opts.registry
-        self.model = model or self.opts.model
-        self.required_fields = required_fields or self.opts.required_fields
-        self.only_primary_key = only_primary_key or self.opts.only_primary_key
-
-    def get_registry(self):
-        registry = self.context.get('registry', self.registry)
-        if not registry:
-            raise RegistryNotFound(
-                'No registry found to build schema %r' % self)
-
-        return registry
-
-    def get_only_primary_key(self):
-        return self.context.get('only_primary_key', self.only_primary_key)
-
-    def get_model(self):
-        return self.context.get('model', self.model)
-
-    def get_required_fields(self):
-        return self.context.get('required_fields', self.required_fields)
 
     def generate_marsmallow_instance(self):
         """Generate the real mashmallow-sqlalchemy schema"""
-        model = self.get_model()
-        registry = self.get_registry()
-        instances = self.context.get('instances', self.instances)
-        only_primary_key = self.get_only_primary_key()
-        required_fields = self.get_required_fields()
+        registry = self.context.get('registry', self.registry)
+        required_fields = self.context.get(
+            'required_fields', self.required_fields)
+        model = self.context.get('model', self.model)
+
+        cls_name = 'Model.Schema.%s' % model
+        if registry is None:
+            raise RegistryNotFound(
+                'No registry found for create schema %r' % cls_name)
 
         Schema = type(
-            'Model.Schema.%s' % model,
-            (TemplateSchema, self.__class__, MS),
+            cls_name, (TemplateSchema, self.Schema, MS),
             {
                 'Meta': type(
                     'Meta',
@@ -309,14 +287,14 @@ class ModelSchema(Schema):
 
         kwargs = self.kwargs.copy()
 
-        if only_primary_key:
+        if self.only_primary_key:
             Model = registry.get(model)
             pks = Model.get_primary_keys()
             kwargs['only'] = pks
 
         schema = Schema(*self.args, **kwargs)
         schema.context['registry'] = registry
-        schema.context['instances'] = instances
+        schema.context['instances'] = self.instances
 
         return schema
 
@@ -327,9 +305,20 @@ class ModelSchema(Schema):
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
                         'required_fields')
+    def loads(self, *args, **kwargs):
+        """overload the main method to call in it in the real schema"""
+        return self.schema.load(*args, **kwargs)
+
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
+                        'required_fields')
     def load(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.load(*args, **kwargs)
+
+    @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
+    def dumps(self, *args, **kwargs):
+        """overload the main method to call in it in the real schema"""
+        return self.schema.dump(*args, **kwargs)
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def dump(self, *args, **kwargs):
@@ -341,3 +330,6 @@ class ModelSchema(Schema):
     def validate(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
         return self.schema.validate(*args, **kwargs)
+
+    def _update_fields(self, *args, **kwargs):
+        return self.schema._update_fields(*args, **kwargs)

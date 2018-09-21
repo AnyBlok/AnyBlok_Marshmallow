@@ -10,8 +10,8 @@
 # noqa
 from anyblok.column import Integer, String
 from anyblok.relationship import Many2One, Many2Many
-from anyblok_marshmallow import ModelSchema
 from anyblok_marshmallow.fields import Nested
+from anyblok_marshmallow.schema import SchemaWrapper
 
 
 def add_simple_model():
@@ -25,10 +25,8 @@ def add_simple_model():
         number = Integer()
 
 
-class ExempleSchema(ModelSchema):
-
-    class Meta:
-        model = 'Model.Exemple'
+class ExempleSchema(SchemaWrapper):
+    model = 'Model.Exemple'
 
 
 def add_complexe_model():
@@ -72,30 +70,24 @@ def add_complexe_model():
             one2many="addresses")
 
 
-class CitySchema(ModelSchema):
-
-    class Meta:
-        model = 'Model.City'
+class CitySchema(SchemaWrapper):
+    model = 'Model.City'
 
 
-class TagSchema(ModelSchema):
-
-    class Meta:
-        model = 'Model.Tag'
+class TagSchema(SchemaWrapper):
+    model = 'Model.Tag'
 
 
-class AddressSchema(ModelSchema):
+class AddressSchema(SchemaWrapper):
+    model = 'Model.Address'
 
-    city = Nested(CitySchema)
-
-    class Meta:
-        model = 'Model.Address'
+    class Schema:
+        city = Nested(CitySchema)
 
 
-class CustomerSchema(ModelSchema):
+class CustomerSchema(SchemaWrapper):
+    model = 'Model.Customer'
 
-    addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
-    tags = Nested(TagSchema, many=True)
-
-    class Meta:
-        model = 'Model.Customer'
+    class Schema:
+        addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
+        tags = Nested(TagSchema, many=True)
