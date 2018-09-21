@@ -25,16 +25,21 @@ class ColumnSchema2(SchemaWrapper):
         post_load_attributes = ['model', 'name']
 
 
-class PostLoadCustomSchema(CustomerSchema, PostLoadSchema):
-    pass
+class PostLoadCustomSchema(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
+        pass
 
 
-class PostLoadCustomSchema2(CustomerSchema, PostLoadSchema):
-    post_load_attributes = ['name']
+class PostLoadCustomSchema2(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
+        post_load_attributes = ['name']
 
 
-class PostLoadCustomSchema3(CustomerSchema, PostLoadSchema):
-    post_load_attributes = ['ko']
+class PostLoadCustomSchema3(SchemaWrapper):
+    model = "Model.System.Column"
+
+    class Schema(PostLoadSchema):
+        post_load_attributes = ['ko']
 
 
 class TestPostLoad(DBTestCase):
@@ -132,8 +137,8 @@ class TestPostLoad(DBTestCase):
             exception.exception.messages,
             {
                 'instance': (
-                    "No instance of <class 'anyblok.model.ModelCustomer'> "
-                    "found with the filter keys ['id']"
+                    "No instance of <class 'anyblok.model.factory."
+                    "ModelCustomer'> found with the filter keys ['id']"
                 ),
             }
         )
@@ -153,8 +158,8 @@ class TestPostLoad(DBTestCase):
             exception.exception.messages,
             {
                 'instance': (
-                    "2 instances of <class 'anyblok.model.ModelCustomer'> "
-                    "found with the filter keys ['name']"
+                    "2 instances of <class 'anyblok.model.factory."
+                    "ModelCustomer'> found with the filter keys ['name']"
                 ),
             }
         )

@@ -24,7 +24,7 @@ class TestPrimaryKey(DBTestCase):
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(data.data, {'id': customer.id})
+        self.assertEqual(data, {'id': customer.id})
 
     def test_load_only_primary_key_from_context(self):
         registry = self.init_registry(add_complexe_model)

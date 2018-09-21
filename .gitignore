@@ -23,6 +23,8 @@ develop-eggs/
 env/
 venv/
 virtualenv/
+cover/
+.coverage
 
 gmon.out
 

@@ -266,6 +266,8 @@ class SchemaWrapper(SchemaABC):
         required_fields = self.context.get(
             'required_fields', self.required_fields)
         model = self.context.get('model', self.model)
+        only_primary_key = self.context.get(
+            'only_primary_key', self.only_primary_key)
 
         cls_name = 'Model.Schema.%s' % model
         if registry is None:
@@ -290,7 +292,7 @@ class SchemaWrapper(SchemaABC):
 
         kwargs = self.kwargs.copy()
 
-        if self.only_primary_key:
+        if only_primary_key:
             Model = registry.get(model)
             pks = Model.get_primary_keys()
             kwargs['only'] = pks
