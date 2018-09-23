@@ -181,13 +181,9 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema()
         errors = customer_schema.validate(
             dump_data, registry=registry, model="Model.Customer")
-        self.assertEqual(
-            errors,
-            {
-                'wrong_field':
-                ["Unknown fields {'wrong_field'} on Model Model.Customer"]
-            }
-        )
+        self.assertIn(
+            "Unknown fields {'wrong_field'} on Model Model.Customer",
+            errors['wrong_field'])
 
     def test_anyblok_text_is_represented_by_anyblok_marshmallow_text(self):
 

@@ -35,10 +35,8 @@ class PostLoadCustomSchema2(CustomerSchema):
         post_load_attributes = ['name']
 
 
-class PostLoadCustomSchema3(SchemaWrapper):
-    model = "Model.System.Column"
-
-    class Schema(PostLoadSchema):
+class PostLoadCustomSchema3(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
         post_load_attributes = ['ko']
 
 

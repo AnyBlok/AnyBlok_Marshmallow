@@ -149,7 +149,7 @@ class ModelSchemaOpts(SchemaOpts):
 class TemplateSchema:
     OPTIONS_CLASS = MSO
 
-    @validates_schema(pass_original=True)
+    @validates_schema(pass_original=True, skip_on_field_errors=False)
     def check_unknown_fields(self, data, original_data):
         od = set(original_data.keys())
         unknown = od - set(self.fields)
