@@ -6,7 +6,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from marshmallow import post_load, SchemaOpts, validates_schema, validate
+from marshmallow import post_load, validates_schema, validate
 from marshmallow_sqlalchemy.schema import (
     ModelSchema as MS,
     ModelSchemaOpts as MSO
@@ -128,22 +128,6 @@ class ModelConverter(MC):
             labels = [x.name for x in pycountry.countries]
             validators = kwargs.get('validate', [])
             validators.append(validate.OneOf(choices, labels=labels))
-
-
-class ModelSchemaOpts(SchemaOpts):
-    """Model schema option for Model schema
-
-    Add get option from the Meta:
-
-    * model: name of an AnyBlok model **required**
-    * registry: an AnyBlok registry
-    """
-    def __init__(self, meta, *args, **kwargs):
-        super(ModelSchemaOpts, self).__init__(meta, *args, **kwargs)
-        self.model = getattr(meta, 'model', False)
-        self.registry = getattr(meta, 'registry', False)
-        self.only_primary_key = getattr(meta, 'only_primary_key', False)
-        self.required_fields = getattr(meta, 'required_fields', None)
 
 
 class TemplateSchema:
@@ -313,7 +297,7 @@ class SchemaWrapper(SchemaABC):
                         'required_fields')
     def loads(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
-        return self.schema.load(*args, **kwargs)
+        return self.schema.loads(*args, **kwargs)
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
                         'required_fields')
@@ -324,7 +308,7 @@ class SchemaWrapper(SchemaABC):
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def dumps(self, *args, **kwargs):
         """overload the main method to call in it in the real schema"""
-        return self.schema.dump(*args, **kwargs)
+        return self.schema.dumps(*args, **kwargs)
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances')
     def dump(self, *args, **kwargs):
