@@ -298,6 +298,7 @@ class SchemaWrapper(SchemaABC):
             kwargs['only'] = pks
 
         schema = Schema(*self.args, **kwargs)
+        schema.context.update(self.context)
         schema.context['registry'] = registry
         schema.context['instances'] = self.instances
 
