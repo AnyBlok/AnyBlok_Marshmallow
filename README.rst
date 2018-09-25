@@ -27,7 +27,7 @@
 AnyBlok Marshmallow
 ===================
 
-Improve AnyBlok `AnyBlok <http://doc.anyblok.org>`_ to add validator, serializer and 
+Improve `AnyBlok <http://doc.anyblok.org>`_ to add validator, serializer and 
 deserializer schema with `marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_.
 
 This module is a wrapper of `marshmallow-sqlalchemy <https://marshmallow-sqlalchemy.readthedocs.io/en/latest/>`_,
