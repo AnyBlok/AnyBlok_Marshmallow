@@ -12,13 +12,18 @@
 CHANGELOG
 =========
 
-2.1.0
------
+2.1.0 (2018-09-26)
+------------------
 
-* Fixed compatibility with Marshmallow > 3.0.0b8
-* Removed ``ModelSchema``
-* Added ``SchemaWrapper``, this is the best way to defined agenerated
-  schema with **marshmallow_sqlalchemy** 
+* Fixed the compatibility with **Marshmallow > 3.0.0b8**
+* Removed ``ModelSchema`` class
+* Added ``SchemaWrapper``, this is the best way to defined a generated
+  schema with the **marshmallow_sqlalchemy** library
+
+.. warnning::
+
+    This version break the compatibility with previous version, in the only
+    goal to be adapted with the latest version of **marshmallow**
 
 2.0.1 (2018-06-07)
 ------------------
