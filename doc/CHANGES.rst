@@ -20,7 +20,7 @@ CHANGELOG
 * Added ``SchemaWrapper``, this is the best way to defined a generated
   schema with the **marshmallow_sqlalchemy** library
 
-.. warnning::
+.. warning::
 
     This version break the compatibility with previous version, in the only
     goal to be adapted with the latest version of **marshmallow**
