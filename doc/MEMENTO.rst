@@ -74,42 +74,38 @@ Declare your schema
 
 ::
 
-    from anyblok_marshmallow import ModelSchema, PostLoadSchema, Nested
+    from anyblok_marshmallow import SchemaWrapper, PostLoadSchema, Nested
 
-    class CitySchema(ModelSchema):
-
-        class Meta:
-            model = 'Model.City'
+    class CitySchema(SchemaWrapper):
+        model = 'Model.City'
 
 
-    class TagSchema(ModelSchema):
-
-        class Meta:
-            model = 'Model.Tag'
+    class TagSchema(SchemaWrapper):
+        model = 'Model.Tag'
 
 
-    class AddressSchema(ModelSchema):
+    class AddressSchema(SchemaWrapper):
+        model = 'Model.Address'
 
-        # follow the relationship Many2One and One2One
-        city = Nested(CitySchema)
+        class Schema:
+            # Add some marshmallow fields or behaviours
 
-        class Meta:
-            model = 'Model.Address'
+            # follow the relationship Many2One and One2One
+            city = Nested(CitySchema)
 
 
-    class CustomerSchema(PostLoadSchema, ModelSchema):
+    class CustomerSchema(SchemaWrapper):
+        model = 'Model.Customer'
+        # optionally attach an AnyBlok registry
+        # to use for serialization, desarialization and validation
+        registry = registry
 
-        # follow the relationship One2Many and Many2Many
-        # - the many=True is required because it is *2Many
-        # - exclude is used to forbid the recurse loop
-        addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
-        tags = Nested(TagSchema, many=True)
-
-        class Meta:
-            model = 'Model.Customer'
-            # optionally attach an AnyBlok registry
-            # to use for serialization, desarialization and validation
-            registry = registry
+        class Schema(PostLoadSchema):
+            # follow the relationship One2Many and Many2Many
+            # - the many=True is required because it is *2Many
+            # - exclude is used to forbid the recurse loop
+            addresses = Nested(AddressSchema, many=True, exclude=('customer', ))
+            tags = Nested(TagSchema, many=True)
 
 
     customer_schema = CustomerSchema()
@@ -125,6 +121,11 @@ Declare your schema
 
     **Ref** in version **1.4.0**, ``post_load_return_instance`` was replaced by the mixin class
     ``PostLoadSchema``
+
+.. note::
+
+    **Ref** in version **2.1.0**, ``ModelSchema`` was replaced by ``SchemaWrapper``. This action
+    break the compatibility with the previous version, but allow to follow the upgrade of **marshmallow**
 
 
 (De)serialize your data and validate it
@@ -197,16 +198,14 @@ The schema need to have the registry.
 If no registry found when the de(serialization) or validation then the 
 **RegistryNotFound** exception will be raised.
 
-Add the **registry** by the Meta
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Add the **registry** by the class attribute
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is the solution given in the main exemple::
 
-    class CustomerSchema(ModelSchema):
-
-        class Meta:
-            model = 'Model.Customer'
-            registry = registry
+    class CustomerSchema(SchemaWrapper):
+        model = 'Model.Customer'
+        registry = registry
 
 
 Add the **registry** during init
@@ -236,12 +235,14 @@ or
     customer_schema.context['registry'] = registry
 
 
-Add the **registry** when the de(serialization or validatoris called
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Add the **registry** when the de(serialization or validator is called
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
+    customer_schema.dumps(customer, registry=registry)
     customer_schema.dump(customer, registry=registry)
+    customer_schema.loads(dump_data, registry=registry)
     customer_schema.load(dump_data, registry=registry)
     customer_schema.validate(dump_data, registry=registry)
 
@@ -254,10 +255,8 @@ can be passed by definition, initialization, context or during the call of the (
 
 ::
 
-    class AnySchema(ModelSchema):
-
-        class Meta:
-            model = "Model.Customer"
+    class AnySchema(SchemaWrapper):
+        model = "Model.Customer"
 
 or
 
@@ -275,7 +274,9 @@ or
 
 ::
 
+    any_schema.dumps(instance, model="Model.Customer")
     any_schema.dump(instance, model="Model.Customer")
+    any_schema.loads(dump_data, model="Model.Customer")
     any_schema.load(dump_data, model="Model.Customer")
     any_schema.validate(dump_data, model="Model.Customer")
 
@@ -288,11 +289,9 @@ can be passed by definition, initialization, context or during the call of the (
 
 ::
 
-    class CustomerSchema(ModelSchema):
-
-        class Meta:
-            model = "Model.Customer"
-            only_primary_key = True
+    class CustomerSchema(SchemaWrapper):
+        model = "Model.Customer"
+        only_primary_key = True
 
 or
 
@@ -310,7 +309,9 @@ or
 
 ::
 
+    customer_schema.dumps(instance, only_primary_key=True)
     customer_schema.dump(instance, only_primary_key=True)
+    customer_schema.loads(dump_data, only_primary_key=True)
     customer_schema.load(dump_data, only_primary_key=True)
     customer_schema.validate(dump_data, only_primary_key=True)
 
@@ -322,12 +323,10 @@ This option force the generated fields, and only them to be requried.
 
 ::
 
-    class CustomerSchema(ModelSchema):
-
-        class Meta:
-            model = "Model.Customer"
-            required_fields = True
-            # or required_fields = [ list of fieldname ]
+    class CustomerSchema(SchemaWrapper):
+        model = "Model.Customer"
+        required_fields = True
+        # or required_fields = [ list of fieldname ]
 
 or
 
@@ -345,6 +344,7 @@ or
 
 ::
 
+    customer_schema.loads(dump_data, required_fields=True)
     customer_schema.load(dump_data, required_fields=True)
     customer_schema.validate(dump_data, required_fields=True)
 
@@ -371,15 +371,15 @@ AnyBlok models::
 
 AnyBlok / Marchmallow schema::
 
-    class SaleOrderSchema(ModelSchema):
-        class Meta:
-            model = 'Model.SaleOrder'
+    class SaleOrderSchema(SchemaWrapper):
+        model = 'Model.SaleOrder'
 
-        discount = JsonCollection(
-            fieldname='properties',
-            keys=['allowed_discount'],
-            cls_or_instance_type=marshmallow.fields.Integer(required=True)
-        )
+        class Schema:
+            discount = JsonCollection(
+                fieldname='properties',
+                keys=['allowed_discount'],
+                cls_or_instance_type=marshmallow.fields.Integer(required=True)
+            )
 
 Use::
 
@@ -400,18 +400,17 @@ Use::
 
     --------------------------
 
-    data, errors = schema.load(
+    data = schema.load(
         {
             number='SO0001',
             discount=10,
         },
         instances={'default': goodcustomer}
     )
-    ==> error = {}
 
     --------------------------
 
-    data, errors = schema.load(
+    data = schema.load(
         {
             number='SO0001',
             discount=10,
@@ -422,7 +421,7 @@ Use::
 
     --------------------------
 
-    data, errors = schema.load(
+    data = schema.load(
         {
             number='SO0001',
             discount=10,

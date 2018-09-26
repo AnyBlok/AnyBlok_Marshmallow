@@ -7,7 +7,7 @@
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
-from anyblok_marshmallow import ModelSchema
+from anyblok_marshmallow import SchemaWrapper
 from anyblok import Declarations
 from anyblok.column import Integer
 from anyblok.relationship import One2One, Many2One, Many2Many
@@ -50,17 +50,15 @@ class TestRelationShip(DBTestCase):
 
     def getExempleSchema(self):
 
-        class ExempleSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple'
+        class ExempleSchema(SchemaWrapper):
+            model = 'Model.Exemple'
 
         return ExempleSchema
 
     def getExemple2Schema(self):
 
-        class Exemple2Schema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple2'
+        class Exemple2Schema(SchemaWrapper):
+            model = 'Model.Exemple2'
 
         return Exemple2Schema
 

@@ -7,12 +7,12 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model
-from anyblok_marshmallow import ModelSchema, fields
+from anyblok_marshmallow import SchemaWrapper, fields
 from anyblok.column import Integer, Text
 from anyblok import Declarations
 
 
-class AnySchema(ModelSchema):
+class AnySchema(SchemaWrapper):
     pass
 
 
@@ -181,13 +181,9 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema()
         errors = customer_schema.validate(
             dump_data, registry=registry, model="Model.Customer")
-        self.assertEqual(
-            errors,
-            {
-                'wrong_field':
-                ["Unknown fields {'wrong_field'} on Model Model.Customer"]
-            }
-        )
+        self.assertIn(
+            "Unknown fields {'wrong_field'} on Model Model.Customer",
+            errors['wrong_field'])
 
     def test_anyblok_text_is_represented_by_anyblok_marshmallow_text(self):
 
@@ -200,9 +196,8 @@ class TestModelSchema(DBTestCase):
 
         registry = self.init_registry(add_in_registry)
 
-        class ExempleSchema(ModelSchema):
-            class Meta:
-                model = 'Model.Exemple'
+        class ExempleSchema(SchemaWrapper):
+            model = 'Model.Exemple'
 
         schema = ExempleSchema(registry=registry).schema
         field = schema.fields['name']

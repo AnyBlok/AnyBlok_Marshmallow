@@ -1,0 +1,10 @@
+[run]
+omit =
+    # omit anything in a tests directory anywhere
+    */tests/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # unexecuting logger
+    logger\.

@@ -12,6 +12,14 @@
 CHANGELOG
 =========
 
+2.1.0
+-----
+
+* Fixed compatibility with Marshmallow > 3.0.0b8
+* Removed ``ModelSchema``
+* Added ``SchemaWrapper``, this is the best way to defined agenerated
+  schema with **marshmallow_sqlalchemy** 
+
 2.0.1 (2018-06-07)
 ------------------
 

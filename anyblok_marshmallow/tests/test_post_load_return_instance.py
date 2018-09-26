@@ -7,33 +7,37 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 from anyblok.tests.testcase import DBTestCase
 from . import add_complexe_model, CustomerSchema
-from anyblok_marshmallow import ModelSchema, PostLoadSchema
+from anyblok_marshmallow import SchemaWrapper, PostLoadSchema
 from marshmallow.exceptions import ValidationError
 
 
-class ColumnSchema(PostLoadSchema, ModelSchema):
+class ColumnSchema(SchemaWrapper):
+    model = "Model.System.Column"
 
-    class Meta:
-        model = "Model.System.Column"
-
-
-class ColumnSchema2(PostLoadSchema, ModelSchema):
-    post_load_attributes = ['model', 'name']
-
-    class Meta:
-        model = "Model.System.Column"
+    class Schema(PostLoadSchema):
+        pass
 
 
-class PostLoadCustomSchema(CustomerSchema, PostLoadSchema):
-    pass
+class ColumnSchema2(SchemaWrapper):
+    model = "Model.System.Column"
+
+    class Schema(PostLoadSchema):
+        post_load_attributes = ['model', 'name']
 
 
-class PostLoadCustomSchema2(CustomerSchema, PostLoadSchema):
-    post_load_attributes = ['name']
+class PostLoadCustomSchema(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
+        pass
 
 
-class PostLoadCustomSchema3(CustomerSchema, PostLoadSchema):
-    post_load_attributes = ['ko']
+class PostLoadCustomSchema2(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
+        post_load_attributes = ['name']
+
+
+class PostLoadCustomSchema3(CustomerSchema):
+    class Schema(CustomerSchema.Schema, PostLoadSchema):
+        post_load_attributes = ['ko']
 
 
 class TestPostLoad(DBTestCase):
@@ -131,8 +135,8 @@ class TestPostLoad(DBTestCase):
             exception.exception.messages,
             {
                 'instance': (
-                    "No instance of <class 'anyblok.model.ModelCustomer'> "
-                    "found with the filter keys ['id']"
+                    "No instance of <class 'anyblok.model.factory."
+                    "ModelCustomer'> found with the filter keys ['id']"
                 ),
             }
         )
@@ -152,8 +156,8 @@ class TestPostLoad(DBTestCase):
             exception.exception.messages,
             {
                 'instance': (
-                    "2 instances of <class 'anyblok.model.ModelCustomer'> "
-                    "found with the filter keys ['name']"
+                    "2 instances of <class 'anyblok.model.factory."
+                    "ModelCustomer'> found with the filter keys ['name']"
                 ),
             }
         )

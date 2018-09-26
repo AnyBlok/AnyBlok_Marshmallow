@@ -121,19 +121,28 @@ Schema
     :show-inheritance:
     :inherited-members:
 
-**ModelSchemaOpts**
--------------------
+**TemplateSchema**
+------------------
 
-.. autoclass:: ModelSchemaOpts
+.. autoclass:: TemplateSchema
     :members:
     :noindex:
     :show-inheritance:
     :inherited-members:
 
-**ModelSchema**
----------------
+**PostLoadSchema**
+------------------
 
-.. autoclass:: ModelSchema
+.. autoclass:: PostLoadSchema
+    :members:
+    :noindex:
+    :show-inheritance:
+    :inherited-members:
+
+**SchemaWrapper**
+-----------------
+
+.. autoclass:: SchemaWrapper
     :members:
     :noindex:
     :show-inheritance:

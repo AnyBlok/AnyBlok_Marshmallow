@@ -63,7 +63,7 @@ class Nested(FieldNested):
     def _deserialize(self, value, attr, data):
         if (
             hasattr(value, '__registry_name__') and
-            self.nested.opts.model == value.__registry_name__
+            self.nested.model == value.__registry_name__
         ):
             return value
 

@@ -61,7 +61,7 @@ Dependencies
 
 AnyBlok works with **Python 3.3** and later. The install process will
 ensure that `AnyBlok <http://doc.anyblok.org>`_,
-`marshmallow <https://marshmallow.readthedocs.io/en/latest/>`_ and 
+`marshmallow >= 3.0.0 <https://marshmallow.readthedocs.io/en/latest/>`_ and 
 `marshmallow-sqlalchemy <https://marshmallow-sqlalchemy.readthedocs.io/en/latest/>`_ 
 are installed, in addition to other dependencies. 
 The latest version of them is strongly recommended.
