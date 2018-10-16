@@ -297,3 +297,25 @@ class InstanceField(Field):
                 raise ValidationError(
                         "Record with key %r = %r on %r not found" %
                         (self.key, value, Model))
+
+
+class Color(String):
+
+    def _serialize(self, value, attr, obj):
+        if value is not None and not isinstance(value, str):
+            return value.hex
+
+        return value
+
+    def _deserialize(self, value, attr, data):
+        if value is not None:
+            try:
+                from colour import Color
+                return Color(value)
+            except Exception as e:
+                raise ValidationError('Not a valid color.')
+
+        return value
+
+    def _validate(self, value):
+        return

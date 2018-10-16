@@ -17,12 +17,16 @@ from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
 from .fields import (
     Raw, Nested, Text, Email, URL, PhoneNumber, Country, String, DateTime,
-    Color, UUID
+    Color, UUID, Float, Boolean, Integer, Time, Date, TimeDelta, Decimal
 )
 import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
 from marshmallow.base import SchemaABC
+from marshmallow.compat import binary_type, text_type
+import datetime as dt
+import uuid
+import decimal
 
 
 def update_from_kwargs(*entries):
@@ -312,6 +316,22 @@ class SchemaWrapper(SchemaABC):
                         'required_fields': required_fields,
                     },
                 ),
+                'TYPE_MAPPING': {
+                    text_type: String,
+                    binary_type: String,
+                    dt.datetime: DateTime,
+                    float: Float,
+                    bool: Boolean,
+                    tuple: Raw,
+                    list: Raw,
+                    set: Raw,
+                    int: Integer,
+                    uuid.UUID: UUID,
+                    dt.time: Time,
+                    dt.date: Date,
+                    dt.timedelta: TimeDelta,
+                    decimal.Decimal: Decimal,
+                }
             }
         )
 

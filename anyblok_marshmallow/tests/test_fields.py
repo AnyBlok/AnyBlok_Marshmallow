@@ -12,7 +12,7 @@ from anyblok_marshmallow import fields
 from anyblok import Declarations
 from anyblok.column import (
     Integer, LargeBinary, Selection, Json, String, Email, URL, UUID,
-    PhoneNumber, Country)
+    PhoneNumber, Country, Color)
 from anyblok.field import Function
 from os import urandom
 from base64 import b64encode
@@ -21,6 +21,12 @@ from marshmallow import Schema
 from uuid import uuid1
 from unittest import skipIf
 from sqlalchemy_utils import PhoneNumber as PN
+
+try:
+    import colour  # noqa
+    has_colour = True
+except Exception:
+    has_colour = False
 
 
 try:
@@ -1408,4 +1414,50 @@ class TestField(DBTestCase):
         self.assertEqual(
             exception.exception.messages.get('number')[0][0],
             "Not a valid integer."
+        )
+
+    def add_field_color(self):
+
+        @Declarations.register(Declarations.Model)
+        class Exemple:
+            id = Integer(primary_key=True)
+            color = Color()
+
+    @skipIf(not has_colour, "colour is not installed")
+    def test_colour_field_type(self):
+        registry = self.init_registry(self.add_field_color)
+        exemple_schema = SchemaWrapper(
+            registry=registry, context={'model': "Model.Exemple"})
+        self.assertTrue(
+            isinstance(exemple_schema.schema.fields['color'], fields.Color))
+
+    @skipIf(not has_colour, "colour is not installed")
+    def test_dump_colour(self):
+        registry = self.init_registry(self.add_field_color)
+        exemple = registry.Exemple.insert(color=colour.Color('#F5F5F5'))
+        self.assertEqual(exemple.color.hex, '#f5f5f5')
+        exemple_schema = SchemaWrapper(
+            registry=registry, context={'model': "Model.Exemple"})
+        data = exemple_schema.dump(exemple)
+        self.assertEqual(
+            data,
+            {
+                'id': exemple.id,
+                'color': "#f5f5f5",
+            }
+        )
+
+    @skipIf(not has_colour, "colour is not installed")
+    def test_colour_with_a_valid_color(self):
+        registry = self.init_registry(self.add_field_color)
+        exemple_schema = SchemaWrapper(
+            registry=registry, context={'model': "Model.Exemple"})
+        dump_data = {
+            'id': 1,
+            'color': "#F5F5F5",
+        }
+        load_data = exemple_schema.load(dump_data)
+        self.assertEqual(
+            load_data,
+            {'id': 1, 'color': colour.Color('#F5F5F5')}
         )
