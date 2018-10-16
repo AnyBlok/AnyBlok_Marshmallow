@@ -15,7 +15,10 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
-from .fields import Raw, Nested, Text, Email, URL, PhoneNumber, Country
+from .fields import (
+    Raw, Nested, Text, Email, URL, PhoneNumber, Country, String, DateTime,
+    Color, UUID
+)
 import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
@@ -70,7 +73,14 @@ class ModelConverter(MC):
         sau.email.EmailType: Email,
         sau.url.URLType: URL,
         sau.phone_number.PhoneNumberType: PhoneNumber,
-        anyblok.column.CountryType: Country
+        sau.encrypted.encrypted_type.EncryptedType: String,
+        sau.uuid.UUIDType: UUID,
+        sau.color.ColorType: Color,
+        anyblok.column.CountryType: Country,
+        anyblok.column.StringType: String,
+        anyblok.column.SelectionType: String,
+        anyblok.column.DateTimeType: DateTime,
+        anyblok.column.TextType: Text,
     })
 
     def fields_for_model(self, Model, **kwargs):
