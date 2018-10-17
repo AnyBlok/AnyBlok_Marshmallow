@@ -12,6 +12,11 @@
 CHANGELOG
 =========
 
+2.2.0 (2018-10-17)
+------------------
+
+* Fixed the convertion of type between **AnyBlok.Column** and **marshmallow.Field**
+
 2.1.0 (2018-09-26)
 ------------------
 
