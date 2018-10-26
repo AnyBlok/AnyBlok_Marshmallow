@@ -12,10 +12,15 @@
 CHANGELOG
 =========
 
-2.1.1
+2.2.1
 -----
 
 * Fixed du of Marshmallow 3.0.0b19 release
+
+2.2.0 (2018-10-17)
+------------------
+
+* Fixed the convertion of type between **AnyBlok.Column** and **marshmallow.Field**
 
 2.1.0 (2018-09-26)
 ------------------

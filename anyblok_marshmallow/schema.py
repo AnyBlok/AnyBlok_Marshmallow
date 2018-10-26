@@ -15,11 +15,18 @@ from marshmallow_sqlalchemy.convert import ModelConverter as MC
 from anyblok.common import anyblok_column_prefix
 from marshmallow.exceptions import ValidationError
 from .exceptions import RegistryNotFound
-from .fields import Raw, Nested, Text, Email, URL, PhoneNumber, Country
+from .fields import (
+    Raw, Nested, Text, Email, URL, PhoneNumber, Country, String, DateTime,
+    Color, UUID, Float, Boolean, Integer, Time, Date, TimeDelta, Decimal
+)
 import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
 from marshmallow.base import SchemaABC
+from marshmallow.compat import binary_type, text_type
+import datetime as dt
+import uuid
+import decimal
 
 
 def update_from_kwargs(*entries):
@@ -70,7 +77,14 @@ class ModelConverter(MC):
         sau.email.EmailType: Email,
         sau.url.URLType: URL,
         sau.phone_number.PhoneNumberType: PhoneNumber,
-        anyblok.column.CountryType: Country
+        sau.encrypted.encrypted_type.EncryptedType: String,
+        sau.uuid.UUIDType: UUID,
+        sau.color.ColorType: Color,
+        anyblok.column.CountryType: Country,
+        anyblok.column.StringType: String,
+        anyblok.column.SelectionType: String,
+        anyblok.column.DateTimeType: DateTime,
+        anyblok.column.TextType: Text,
     })
 
     def fields_for_model(self, Model, **kwargs):
@@ -302,6 +316,22 @@ class SchemaWrapper(SchemaABC):
                         'required_fields': required_fields,
                     },
                 ),
+                'TYPE_MAPPING': {
+                    text_type: String,
+                    binary_type: String,
+                    dt.datetime: DateTime,
+                    float: Float,
+                    bool: Boolean,
+                    tuple: Raw,
+                    list: Raw,
+                    set: Raw,
+                    int: Integer,
+                    uuid.UUID: UUID,
+                    dt.time: Time,
+                    dt.date: Date,
+                    dt.timedelta: TimeDelta,
+                    decimal.Decimal: Decimal,
+                }
             }
         )
 
