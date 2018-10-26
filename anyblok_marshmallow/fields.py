@@ -60,14 +60,14 @@ class Nested(FieldNested):
         self.__schema = None
         return super(Nested, self).schema
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if (
             hasattr(value, '__registry_name__') and
             self.nested.model == value.__registry_name__
         ):
             return value
 
-        return super(Nested, self)._deserialize(value, attr, data)
+        return super(Nested, self)._deserialize(value, attr, data, **kwargs)
 
 
 class File(Field):
@@ -78,7 +78,7 @@ class File(Field):
 
         return None
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if value:
             return b64decode(value.encode('utf-8'))
 
@@ -125,7 +125,7 @@ class JsonCollection(Field):
     def _serialize(self, value, attr, obj):
         return self.container._serialize(value, attr, obj)
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         return self.container.deserialize(value, attr=attr, data=data)
 
     def _validate(self, value):
@@ -184,7 +184,7 @@ class PhoneNumber(String):
 
         return value
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if value is not None:
             region = self.context.get('region', self.region)
             try:
@@ -217,7 +217,7 @@ class Country(String):
 
         return value
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if value is not None:
             try:
                 import pycountry
@@ -266,7 +266,7 @@ class InstanceField(Field):
     def _serialize(self, value, attr, obj):
         return self.container._serialize(value, attr, obj)
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         return self.container.deserialize(value, attr=attr, data=data)
 
     def _validate(self, value):

@@ -12,6 +12,11 @@
 CHANGELOG
 =========
 
+2.1.1
+-----
+
+* Fixed du of Marshmallow 3.0.0b19 release
+
 2.1.0 (2018-09-26)
 ------------------
 
