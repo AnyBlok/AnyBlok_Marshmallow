@@ -189,7 +189,7 @@ class PhoneNumber(String):
             region = self.context.get('region', self.region)
             try:
                 return PN(value, region)
-            except Exception as e:
+            except Exception:
                 raise ValidationError(
                     'The string supplied did not seem to be a phone number.'
                 )
@@ -222,7 +222,7 @@ class Country(String):
             try:
                 import pycountry
                 return pycountry.countries.get(alpha_3=value)
-            except Exception as e:
+            except Exception:
                 raise ValidationError('Not a valid country.')
 
         return value
@@ -312,7 +312,7 @@ class Color(String):
             try:
                 from colour import Color
                 return Color(value)
-            except Exception as e:
+            except Exception:
                 raise ValidationError('Not a valid color.')
 
         return value
