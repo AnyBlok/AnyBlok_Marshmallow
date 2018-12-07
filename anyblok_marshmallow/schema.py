@@ -157,7 +157,7 @@ class TemplateSchema:
                 'Unknown fields %r on Model %s' % (
                     unknown, self.opts.model.__registry_name__
                 ),
-                unknown
+                unknown.pop()
             )
 
     @post_load
