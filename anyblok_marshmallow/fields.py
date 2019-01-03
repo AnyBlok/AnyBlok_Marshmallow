@@ -219,10 +219,9 @@ class Country(String):
 
     def _deserialize(self, value, attr, data, **kwargs):
         if value is not None:
-            try:
-                import pycountry
-                return pycountry.countries.get(alpha_3=value)
-            except Exception:
+            import pycountry
+            value = pycountry.countries.get(alpha_3=value)
+            if value is None:
                 raise ValidationError('Not a valid country.')
 
         return value
