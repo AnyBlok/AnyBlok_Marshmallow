@@ -22,7 +22,6 @@ from marshmallow.fields import (  # noqa
     Integer,
     Decimal,
     Boolean,
-    FormattedString,
     Float,
     DateTime,
     LocalDateTime,
