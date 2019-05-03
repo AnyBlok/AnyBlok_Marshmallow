@@ -164,7 +164,7 @@ class TestField(DBTestCase):
 
         self.assertEqual(
             exception.exception.messages,
-            {'name': ['Not a valid choice.']}
+            {'name': ['Must be one of: foo, bar.']}
         )
 
     def test_validate_selection_with_object_ok(self):
@@ -187,7 +187,7 @@ class TestField(DBTestCase):
         exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
+        self.assertEqual(errors, {'name': ['Must be one of: foo, bar.']})
 
     def test_dump_selection_with_classmethod(self):
         registry = self.init_registry(self.add_field_selection_with_classmethod)
@@ -229,7 +229,7 @@ class TestField(DBTestCase):
 
         self.assertEqual(
             exception.exception.messages,
-            {'name': ['Not a valid choice.']}
+            {'name': ['Must be one of: foo, bar.']}
         )
 
     def test_validate_selection_with_classmethod_ok(self):
@@ -252,7 +252,7 @@ class TestField(DBTestCase):
         exemple_schema = SchemaWrapper(
             registry=registry, context={'model': "Model.Exemple"})
         errors = exemple_schema.validate(dump_data)
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
+        self.assertEqual(errors, {'name': ['Must be one of: foo, bar.']})
 
     def getExempleSchemaLO(self):
 
@@ -470,7 +470,7 @@ class TestField(DBTestCase):
             )
         self.assertEqual(
             exception.exception.messages,
-            {'name': ['Not a valid choice.']}
+            {'name': ['Must be one of: foo, bar.']}
         )
 
     def test_load_json_collection_ko_no_instance(self):
@@ -583,7 +583,7 @@ class TestField(DBTestCase):
             dump_data,
             instances=dict(default=exemple)
         )
-        self.assertEqual(errors, {'name': ['Not a valid choice.']})
+        self.assertEqual(errors, {'name': ['Must be one of: foo, bar.']})
 
     def test_validate_json_collection_ko_no_instance(self):
         registry = self.init_registry(self.add_field_json_collection_property)
@@ -755,8 +755,8 @@ class TestField(DBTestCase):
         self.assertEqual(
             errors,
             {
-                'name1': ['Not a valid choice.'],
-                'name2': ['Not a valid choice.'],
+                'name1': ['Must be one of: foo1, bar1.'],
+                'name2': ['Must be one of: foo2, bar2.'],
             }
         )
 
