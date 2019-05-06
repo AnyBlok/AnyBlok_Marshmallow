@@ -3,6 +3,7 @@
 # This file is a part of the AnyBlok / Marshmallow api project
 #
 #    Copyright (C) 2018 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+#    Copyright (C) 2019 Jean-Sebastien SUZANNE <js.suzanne@gmail.com>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
@@ -12,7 +13,7 @@ from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
 
-version = "2.2.2"
+version = "2.2.3"
 here = abspath(dirname(__file__))
 
 with open(join(here, 'README.rst'), 'r',
