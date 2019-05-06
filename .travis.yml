@@ -25,18 +25,14 @@ services:
   - postgresql
 
 install:
-  - pip install psycopg2
-  - pip install anyblok
+  - pip install -U pip
+  - pip install wheel
+  - pip install psycopg2-binary sqlalchemy  # for unittesting anyblok with postgres
   - pip install marshmallow --pre
-  - pip install furl
-  - pip install pycountry
-  - pip install phonenumbers
-  - pip install colour
-  - pip install flake8
-  - pip install coverage
-  - pip install nose
+  - pip install -U flake8 coverage pytest pytest-cov
+  - pip install -U colour passlib furl phonenumbers pycountry  # special columns
   - pip install coveralls
-  - python setup.py develop
+  - pip install -e .
 
 env:
   global:
@@ -47,7 +43,7 @@ env:
 script:
   - flake8 anyblok_marshmallow
   - psql -c 'create database travis_ci_test;' -U postgres
-  - nosetests anyblok_marshmallow/tests -v -s --with-coverage --cover-package=anyblok_marshmallow
+  - py.test --cov-report= --cov=anyblok_marshmallow anyblok_marshmallow/tests
   
 after_success:
-  coveralls
+  coveralls --data_file=.coverage --config_file=.coveragerc

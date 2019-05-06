@@ -5,16 +5,21 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from anyblok.tests.testcase import DBTestCase
-from . import add_complexe_model, CustomerSchema, AddressSchema, TagSchema
+import pytest
+from . import CustomerSchema, AddressSchema, TagSchema
 from anyblok_marshmallow import SchemaWrapper, RegistryNotFound
 from marshmallow import fields
 
 
-class TestRegistry(DBTestCase):
+class TestRegistry:
 
-    def test_dump_registry_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    @pytest.fixture(autouse=True)
+    def transact(self, request, registry_complexe_model):
+        transaction = registry_complexe_model.begin_nested()
+        request.addfinalizer(transaction.rollback)
+
+    def test_dump_registry_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = CustomerSchema(context={'registry': registry})
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -23,8 +28,8 @@ class TestRegistry(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -48,8 +53,8 @@ class TestRegistry(DBTestCase):
             }
         )
 
-    def test_load_registry_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_registry_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -73,10 +78,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema(context={'registry': registry})
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_registry_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_registry_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -100,10 +105,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema(context={'registry': registry})
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_registry_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_registry_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = CustomerSchema(registry=registry)
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -112,8 +117,8 @@ class TestRegistry(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -137,8 +142,8 @@ class TestRegistry(DBTestCase):
             }
         )
 
-    def test_load_registry_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_registry_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -162,10 +167,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema(registry=registry)
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_registry_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_registry_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -189,10 +194,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema(registry=registry)
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_registry_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_registry_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -201,8 +206,8 @@ class TestRegistry(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer, registry=registry)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -226,8 +231,8 @@ class TestRegistry(DBTestCase):
             }
         )
 
-    def test_load_registry_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_registry_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -251,10 +256,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema()
         data = customer_schema.load(dump_data, registry=registry)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_registry_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_registry_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -278,10 +283,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema()
         errors = customer_schema.validate(dump_data, registry=registry)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_registry_from_meta(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_registry_from_meta(self, registry_complexe_model):
+        registry = registry_complexe_model
         self.registry = registry
 
         class CustomerSchema(SchemaWrapper):
@@ -301,8 +306,8 @@ class TestRegistry(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -326,8 +331,8 @@ class TestRegistry(DBTestCase):
             }
         )
 
-    def test_load_registry_from_meta(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_registry_from_meta(self, registry_complexe_model):
+        registry = registry_complexe_model
         self.registry = registry
 
         class CustomerSchema(SchemaWrapper):
@@ -362,10 +367,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema()
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_registry_from_meta(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_registry_from_meta(self, registry_complexe_model):
+        registry = registry_complexe_model
         self.registry = registry
 
         class CustomerSchema(SchemaWrapper):
@@ -400,10 +405,10 @@ class TestRegistry(DBTestCase):
         }
         customer_schema = CustomerSchema()
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_without_registry(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_without_registry(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = CustomerSchema()
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -411,11 +416,10 @@ class TestRegistry(DBTestCase):
         city = registry.City.insert(name="Rouen", zipcode="76000")
         registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
-        with self.assertRaises(RegistryNotFound):
+        with pytest.raises(RegistryNotFound):
             customer_schema.dump(customer)
 
-    def test_load_without_registry(self):
-        self.init_registry(add_complexe_model)
+    def test_load_without_registry(self, registry_complexe_model):
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -438,11 +442,10 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema()
-        with self.assertRaises(RegistryNotFound):
+        with pytest.raises(RegistryNotFound):
             customer_schema.load(dump_data)
 
-    def test_validate_without_registry(self):
-        self.init_registry(add_complexe_model)
+    def test_validate_without_registry(self, registry_complexe_model):
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -465,5 +468,5 @@ class TestRegistry(DBTestCase):
             ],
         }
         customer_schema = CustomerSchema()
-        with self.assertRaises(RegistryNotFound):
+        with pytest.raises(RegistryNotFound):
             customer_schema.validate(dump_data)

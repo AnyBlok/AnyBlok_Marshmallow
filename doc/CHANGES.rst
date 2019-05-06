@@ -12,6 +12,11 @@
 CHANGELOG
 =========
 
+2.2.3
+-----
+
+* Refactored unittest from nosetest to pytest
+
 2.2.2 (2018-12-06)
 ------------------
 

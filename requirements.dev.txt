@@ -3,3 +3,6 @@ ipdb
 ipdbplugin
 ipython
 pysqlite3
+flake8
+pytest
+pytest-cov

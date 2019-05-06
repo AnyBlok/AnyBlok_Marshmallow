@@ -5,7 +5,8 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from anyblok.tests.testcase import DBTestCase
+import pytest
+from .conftest import init_registry
 from anyblok_marshmallow import SchemaWrapper
 from anyblok_marshmallow.fields import Nested
 from anyblok import Declarations
@@ -13,34 +14,42 @@ from anyblok.column import Integer, String
 from anyblok.relationship import One2One
 
 
-class TestPolymorphism(DBTestCase):
+def add_field_polymorphic():
 
-    def add_field_one2one(self):
+    @Declarations.register(Declarations.Model)
+    class Exemple:
+        id = Integer(primary_key=True)
+        exemple = One2One(model='Model.Exemple', backref='exemple2')
+        type = String(nullable=False)
 
-        @Declarations.register(Declarations.Model)
-        class Exemple:
-            id = Integer(primary_key=True)
-            exemple = One2One(model='Model.Exemple', backref='exemple2')
-            type = String(nullable=False)
+        @classmethod
+        def define_mapper_args(cls):
+            mapper_args = super(Exemple, cls).define_mapper_args()
+            if cls.__registry_name__ == 'Model.Exemple':
+                mapper_args.update({
+                    'polymorphic_identity': 'exemple',
+                    'polymorphic_on': cls.type,
+                })
+            else:
+                mapper_args.update({
+                    'polymorphic_identity': 'exemple2',
+                })
 
-            @classmethod
-            def define_mapper_args(cls):
-                mapper_args = super(Exemple, cls).define_mapper_args()
-                if cls.__registry_name__ == 'Model.Exemple':
-                    mapper_args.update({
-                        'polymorphic_identity': 'exemple',
-                        'polymorphic_on': cls.type,
-                    })
-                else:
-                    mapper_args.update({
-                        'polymorphic_identity': 'exemple2',
-                    })
+            return mapper_args
 
-                return mapper_args
+    @Declarations.register(Declarations.Model)
+    class Exemple2(Declarations.Model.Exemple):
+        pass
 
-        @Declarations.register(Declarations.Model)
-        class Exemple2(Declarations.Model.Exemple):
-            pass
+
+@pytest.fixture(scope="class")
+def registry_field_polymorphic(request, bloks_loaded):
+    registry = init_registry(add_field_polymorphic)
+    request.addfinalizer(registry.close)
+    return registry
+
+
+class TestPolymorphism:
 
     def getExempleSchema(self):
 
@@ -56,14 +65,14 @@ class TestPolymorphism(DBTestCase):
 
         return ExempleSchema
 
-    def test_dump_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_dump_one2one_1(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         data = exemple_schema.dump(exemple)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': exemple.id,
                 'exemple2': {
@@ -74,14 +83,14 @@ class TestPolymorphism(DBTestCase):
             }
         )
 
-    def test_dump_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_dump_one2one_2(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple2_schema = self.getExempleSchema()(registry=registry)
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         data = exemple2_schema.dump(exemple2)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': exemple2.id,
                 'exemple': {
@@ -92,8 +101,8 @@ class TestPolymorphism(DBTestCase):
             }
         )
 
-    def test_load_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_load_one2one_1(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         dump_data = {
@@ -105,10 +114,10 @@ class TestPolymorphism(DBTestCase):
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
         data = exemple_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_load_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_load_one2one_2(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         dump_data = {
@@ -120,10 +129,10 @@ class TestPolymorphism(DBTestCase):
         }
         exemple2_schema = self.getExempleSchema()(registry=registry)
         data = exemple2_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_one2one_1(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_validate_one2one_1(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         dump_data = {
@@ -135,10 +144,10 @@ class TestPolymorphism(DBTestCase):
         }
         exemple_schema = self.getExempleSchema()(registry=registry)
         errors = exemple_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_validate_one2one_2(self):
-        registry = self.init_registry(self.add_field_one2one)
+    def test_validate_one2one_2(self, registry_field_polymorphic):
+        registry = registry_field_polymorphic
         exemple = registry.Exemple.insert()
         exemple2 = registry.Exemple2.insert(exemple=exemple)
         dump_data = {
@@ -150,4 +159,4 @@ class TestPolymorphism(DBTestCase):
         }
         exemple2_schema = self.getExempleSchema()(registry=registry)
         errors = exemple2_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors

@@ -5,21 +5,26 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from anyblok.tests.testcase import DBTestCase
-from . import add_complexe_model
+import pytest
 from anyblok_marshmallow import SchemaWrapper, fields
 from anyblok.column import Integer, Text
 from anyblok import Declarations
+from .conftest import init_registry
 
 
 class AnySchema(SchemaWrapper):
     pass
 
 
-class TestModelSchema(DBTestCase):
+class TestModelSchema:
 
-    def test_dump_model_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    @pytest.fixture(autouse=True)
+    def transact(self, request, registry_complexe_model):
+        transaction = registry_complexe_model.begin_nested()
+        request.addfinalizer(transaction.rollback)
+
+    def test_dump_model_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = AnySchema(
             registry=registry, context={'model': "Model.Customer"})
         tag = registry.Tag.insert(name="tag 1")
@@ -29,8 +34,8 @@ class TestModelSchema(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -47,8 +52,8 @@ class TestModelSchema(DBTestCase):
             }
         )
 
-    def test_load_model_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_model_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -56,10 +61,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema(
             registry=registry, context={'model': "Model.Customer"})
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_model_from_context(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_model_from_context(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -67,10 +72,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema(
             registry=registry, context={'model': "Model.Customer"})
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_model_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_model_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = AnySchema(
             registry=registry, model="Model.Customer")
         tag = registry.Tag.insert(name="tag 1")
@@ -80,8 +85,8 @@ class TestModelSchema(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -98,8 +103,8 @@ class TestModelSchema(DBTestCase):
             }
         )
 
-    def test_load_model_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_model_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -107,10 +112,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema(
             registry=registry, model="Model.Customer")
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_model_from_init(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_model_from_init(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -118,10 +123,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema(
             registry=registry, model="Model.Customer")
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_dump_model_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_dump_model_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = AnySchema()
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -131,8 +136,8 @@ class TestModelSchema(DBTestCase):
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(
             customer, registry=registry, model="Model.Customer")
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -149,8 +154,8 @@ class TestModelSchema(DBTestCase):
             }
         )
 
-    def test_load_model_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_model_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -158,10 +163,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema()
         data = customer_schema.load(
             dump_data, registry=registry, model="Model.Customer")
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_model_from_call(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_model_from_call(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -169,10 +174,10 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema()
         errors = customer_schema.validate(
             dump_data, registry=registry, model="Model.Customer")
-        self.assertFalse(errors)
+        assert not errors
 
-    def test_validate_with_wrong_field(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_with_wrong_field(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'test',
@@ -181,9 +186,26 @@ class TestModelSchema(DBTestCase):
         customer_schema = AnySchema()
         errors = customer_schema.validate(
             dump_data, registry=registry, model="Model.Customer")
-        self.assertIn(
-            "Unknown fields {'wrong_field'} on Model Model.Customer",
-            errors['wrong_field'])
+        assert (
+            "Unknown fields {'wrong_field'} on Model Model.Customer" in
+            errors['wrong_field']
+        )
+
+
+class TestModelSchemaSpecCase:
+
+    @pytest.fixture(autouse=True)
+    def close_registry(self, request, bloks_loaded):
+
+        def close():
+            if hasattr(self, 'registry'):
+                self.registry.close()
+
+        request.addfinalizer(close)
+
+    def init_registry(self, *args, **kwargs):
+        self.registry = init_registry(*args, **kwargs)
+        return self.registry
 
     def test_anyblok_text_is_represented_by_anyblok_marshmallow_text(self):
 
@@ -201,4 +223,4 @@ class TestModelSchema(DBTestCase):
 
         schema = ExempleSchema(registry=registry).schema
         field = schema.fields['name']
-        self.assertTrue(isinstance(field, fields.Text))
+        assert isinstance(field, fields.Text)

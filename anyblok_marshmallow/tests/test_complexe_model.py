@@ -5,14 +5,19 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-from anyblok.tests.testcase import DBTestCase
-from . import add_complexe_model, CustomerSchema
+import pytest
+from . import CustomerSchema
 
 
-class TestComplexeSchema(DBTestCase):
+class TestComplexeSchema:
 
-    def test_dump_complexe_schema(self):
-        registry = self.init_registry(add_complexe_model)
+    @pytest.fixture(autouse=True)
+    def transact(self, request, registry_complexe_model):
+        transaction = registry_complexe_model.begin_nested()
+        request.addfinalizer(transaction.rollback)
+
+    def test_dump_complexe_schema(self, registry_complexe_model):
+        registry = registry_complexe_model
         customer_schema = CustomerSchema(context={'registry': registry})
         tag = registry.Tag.insert(name="tag 1")
         customer = registry.Customer.insert(name="C1")
@@ -21,8 +26,8 @@ class TestComplexeSchema(DBTestCase):
         address = registry.Address.insert(
             customer=customer, city=city, street="Somewhere")
         data = customer_schema.dump(customer)
-        self.assertEqual(
-            data,
+        assert (
+            data ==
             {
                 'id': customer.id,
                 'name': customer.name,
@@ -46,8 +51,8 @@ class TestComplexeSchema(DBTestCase):
             }
         )
 
-    def test_load_complexe_schema(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_load_complexe_schema(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -71,10 +76,10 @@ class TestComplexeSchema(DBTestCase):
         }
         customer_schema = CustomerSchema(context={'registry': registry})
         data = customer_schema.load(dump_data)
-        self.assertEqual(data, dump_data)
+        assert data == dump_data
 
-    def test_validate_complexe_schema(self):
-        registry = self.init_registry(add_complexe_model)
+    def test_validate_complexe_schema(self, registry_complexe_model):
+        registry = registry_complexe_model
         dump_data = {
             'id': 1,
             'name': 'name',
@@ -98,4 +103,4 @@ class TestComplexeSchema(DBTestCase):
         }
         customer_schema = CustomerSchema(context={'registry': registry})
         errors = customer_schema.validate(dump_data)
-        self.assertFalse(errors)
+        assert not errors
