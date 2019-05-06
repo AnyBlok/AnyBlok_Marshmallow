@@ -15,6 +15,7 @@ CHANGELOG
 2.2.3
 -----
 
+* Fixed du of Marshmallow 3.0.0RC5 release
 * Refactored unittest from nosetest to pytest
 
 2.2.2 (2018-12-06)
