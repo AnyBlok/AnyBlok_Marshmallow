@@ -26,6 +26,7 @@ from marshmallow.base import SchemaABC
 import datetime as dt
 import uuid
 import decimal
+from functools import lru_cache
 
 
 def update_from_kwargs(*entries):
@@ -291,14 +292,12 @@ class SchemaWrapper(SchemaABC):
         self.args = args
         self.kwargs = kwargs
 
-    def generate_marsmallow_instance(self):
+    @lru_cache()
+    def generate_marsmallow_instance(self, registry, model, only_primary_key,
+                                     *required_fields):
         """Generate the real mashmallow-sqlalchemy schema"""
-        registry = self.context.get('registry', self.registry)
-        required_fields = self.context.get(
-            'required_fields', self.required_fields)
-        model = self.context.get('model', self.model)
-        only_primary_key = self.context.get(
-            'only_primary_key', self.only_primary_key)
+        if len(required_fields) == 1 and required_fields[0] is True:
+            required_fields = True
 
         cls_name = 'Model.Schema.%s' % model
         if registry is None:
@@ -366,7 +365,21 @@ class SchemaWrapper(SchemaABC):
     @property
     def schema(self):
         """property to get the real schema"""
-        return self.generate_marsmallow_instance()
+        registry = self.context.get('registry', self.registry)
+        required_fields = self.context.get(
+            'required_fields', self.required_fields)
+        model = self.context.get('model', self.model)
+        only_primary_key = self.context.get(
+            'only_primary_key', self.only_primary_key)
+
+        if required_fields is None:
+            required_fields = []
+        if required_fields is True:
+            required_fields = [True]
+
+        return self.generate_marsmallow_instance(
+            registry, model, only_primary_key, *required_fields
+        )
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
                         'required_fields')
