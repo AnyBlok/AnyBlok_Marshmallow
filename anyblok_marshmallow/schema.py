@@ -23,7 +23,6 @@ import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
 from marshmallow.base import SchemaABC
-from marshmallow.compat import binary_type, text_type
 import datetime as dt
 import uuid
 import decimal
@@ -149,7 +148,9 @@ class TemplateSchema:
     OPTIONS_CLASS = MSO
 
     @validates_schema(pass_original=True, skip_on_field_errors=False)
-    def check_unknown_fields(self, data, original_data):
+    def check_unknown_fields(self, data, original_data, partial=None,
+                             many=None):
+        # TODO partial, Many
         od = set(original_data.keys())
         unknown = od - set(self.fields)
         if unknown:
@@ -161,7 +162,8 @@ class TemplateSchema:
             )
 
     @post_load
-    def make_instance(self, data):
+    def make_instance(self, data, many=None, partial=None):
+        # TODO partial, Many
         return self.get_instance_from(data)
 
     def get_instance_from(self, data):
@@ -317,8 +319,8 @@ class SchemaWrapper(SchemaABC):
                     },
                 ),
                 'TYPE_MAPPING': {
-                    text_type: String,
-                    binary_type: String,
+                    str: String,
+                    bytes: String,
                     dt.datetime: DateTime,
                     float: Float,
                     bool: Boolean,
@@ -348,6 +350,18 @@ class SchemaWrapper(SchemaABC):
         schema.context['instances'] = self.instances
 
         return schema
+
+    @property
+    def many(self):
+        return self.schema.many
+
+    @property
+    def set_class(self):
+        return self.schema.set_class
+
+    @property
+    def _init_fields(self):
+        return self.schema._init_fields
 
     @property
     def schema(self):

@@ -38,8 +38,8 @@ with open(
 
 requirements = [
     'anyblok',
-    'marshmallow==3.0.0rc5',
-    'marshmallow-sqlalchemy',
+    'marshmallow>=3.2.1',
+    'marshmallow-sqlalchemy>=0.19.0',
 ]
 
 setup(
@@ -60,7 +60,6 @@ setup(
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
