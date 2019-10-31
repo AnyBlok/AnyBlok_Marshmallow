@@ -13,26 +13,32 @@
 CHANGELOG
 =========
 
+2.2.4 (2019-09-09)
+------------------
+
+* Fix Marshmallow dependency to 3.0.3 release
+* Drop support for python 3.4 and 3.5
+
 2.2.3 (2019-05-06)
 ------------------
 
-* Fixed du of Marshmallow 3.0.0RC5 release
+* Fix Marshmallow dependency to 3.0.0RC5 release
 * Refactored unittest from nosetest to pytest
 
 2.2.2 (2018-12-06)
 ------------------
 
-* Fixed du of Marshmallow 3.0.0RC1 release
+* Fix Marshmallow dependency to 3.0.0RC1 release
 
 2.2.1 (2018-10-26)
 ------------------
 
-* Fixed du of Marshmallow 3.0.0b19 release
+* Fix Marshmallow dependency to 3.0.0b19 release
 
 2.2.0 (2018-10-17)
 ------------------
 
-* Fixed the convertion of type between **AnyBlok.Column** and **marshmallow.Field**
+* Fixed the conversion of type between **AnyBlok.Column** and **marshmallow.Field**
 
 2.1.0 (2018-09-26)
 ------------------
