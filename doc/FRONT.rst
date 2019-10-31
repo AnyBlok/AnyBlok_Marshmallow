@@ -1,6 +1,7 @@
 .. This file is a part of the AnyBlok / Marshmallow project
 ..
 ..    Copyright (C) 2017 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+..    Copyright (C) 2019 Jean-Sebastien SUZANNE <js.suzanne@gmail.com>
 ..
 .. This Source Code Form is subject to the terms of the Mozilla Public License,
 .. v. 2.0. If a copy of the MPL was not distributed with this file,You can
@@ -51,17 +52,17 @@ Installation will add the ``anyblok`` commands to the environment.
 Unit Test
 ---------
 
-Run the test with ``nose``::
+Run the test with ``pytest``::
 
-    pip install nose
-    nosetests anyblok_marshmallow/tests
+    pip install pytest pytest-cov
+    ANYBLOK_DRIVER_NAME=postgres ANYBLOK_DATABASE_NAME=mybase pytest anyblok_marshmallow/tests
 
 Dependencies
 ------------
 
-AnyBlok works with **Python 3.3** and later. The install process will
+AnyBlok works with **Python 3.6** and later. The install process will
 ensure that `AnyBlok <http://doc.anyblok.org>`_,
-`marshmallow >= 3.0.0 <https://marshmallow.readthedocs.io/en/latest/>`_ and 
+`marshmallow >= 3.2.0 <https://marshmallow.readthedocs.io/en/latest/>`_ and 
 `marshmallow-sqlalchemy <https://marshmallow-sqlalchemy.readthedocs.io/en/latest/>`_ 
 are installed, in addition to other dependencies. 
 The latest version of them is strongly recommended.
