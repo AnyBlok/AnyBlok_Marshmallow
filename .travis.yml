@@ -15,7 +15,6 @@ env:
     - ANYBLOK_DATABASE_NAME=travis_ci_test
     - ANYBLOK_DATABASE_DRIVER=postgresql
     - ANYBLOK_DATABASE_USER=postgres
-    - ASQLSERVER='psql -c' 
     - SQLPYCLIENT='psycopg2-binary'
 
 
@@ -24,9 +23,9 @@ matrix:
       - python: "3.7-dev"
       - python: "3.8-dev"
       - python: "nightly"
-    include:
+  include:
       - python: "pypy3.5"
-        env: ANYBLOK_DATABASE_DRIVER=postgresql+psycopg2cffi ANYBLOK_DATABASE_USER=postgres SQLSERVER='psql -c' SQLPYCLIENT='psycopg2cffi'
+        env: ANYBLOK_DATABASE_DRIVER=postgresql+psycopg2cffi SQLPYCLIENT='psycopg2cffi'
 
 virtualenv:
   system_site_packages: false
@@ -45,7 +44,7 @@ install:
 
 script:
   - flake8 anyblok_marshmallow
-  - $SQLSERVER 'create database travis_ci_test;'
+  - psql -c 'create database travis_ci_test;'
   - py.test --cov-report= --cov=anyblok_marshmallow anyblok_marshmallow/tests
   
 after_success:
