@@ -24,7 +24,7 @@ from marshmallow.fields import (  # noqa
     Boolean,
     Float,
     DateTime,
-    LocalDateTime,
+    # LocalDateTime,
     Time,
     Date,
     TimeDelta,
@@ -56,7 +56,7 @@ class Nested(FieldNested):
 
         it is the only way to propagate the context at each call
         """
-        self.__schema = None
+        self._schema = None
         return super(Nested, self).schema
 
     def _deserialize(self, value, attr, data, **kwargs):
@@ -305,7 +305,7 @@ class Color(String):
 
         return value
 
-    def _deserialize(self, value, attr, data):
+    def _deserialize(self, value, attr, data, **kwargs):
         if value is not None:
             try:
                 from colour import Color

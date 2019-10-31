@@ -23,10 +23,10 @@ import anyblok
 import sqlalchemy as sa
 import sqlalchemy_utils.types as sau
 from marshmallow.base import SchemaABC
-from marshmallow.compat import binary_type, text_type
 import datetime as dt
 import uuid
 import decimal
+from functools import lru_cache
 
 
 def update_from_kwargs(*entries):
@@ -149,7 +149,9 @@ class TemplateSchema:
     OPTIONS_CLASS = MSO
 
     @validates_schema(pass_original=True, skip_on_field_errors=False)
-    def check_unknown_fields(self, data, original_data):
+    def check_unknown_fields(self, data, original_data, partial=None,
+                             many=None):
+        # TODO partial, Many
         od = set(original_data.keys())
         unknown = od - set(self.fields)
         if unknown:
@@ -161,7 +163,8 @@ class TemplateSchema:
             )
 
     @post_load
-    def make_instance(self, data):
+    def make_instance(self, data, many=None, partial=None):
+        # TODO partial, Many
         return self.get_instance_from(data)
 
     def get_instance_from(self, data):
@@ -289,14 +292,12 @@ class SchemaWrapper(SchemaABC):
         self.args = args
         self.kwargs = kwargs
 
-    def generate_marsmallow_instance(self):
+    @lru_cache()
+    def generate_marsmallow_instance(self, registry, model, only_primary_key,
+                                     *required_fields):
         """Generate the real mashmallow-sqlalchemy schema"""
-        registry = self.context.get('registry', self.registry)
-        required_fields = self.context.get(
-            'required_fields', self.required_fields)
-        model = self.context.get('model', self.model)
-        only_primary_key = self.context.get(
-            'only_primary_key', self.only_primary_key)
+        if len(required_fields) == 1 and required_fields[0] is True:
+            required_fields = True
 
         cls_name = 'Model.Schema.%s' % model
         if registry is None:
@@ -317,8 +318,8 @@ class SchemaWrapper(SchemaABC):
                     },
                 ),
                 'TYPE_MAPPING': {
-                    text_type: String,
-                    binary_type: String,
+                    str: String,
+                    bytes: String,
                     dt.datetime: DateTime,
                     float: Float,
                     bool: Boolean,
@@ -350,9 +351,35 @@ class SchemaWrapper(SchemaABC):
         return schema
 
     @property
+    def many(self):
+        return self.schema.many
+
+    @property
+    def set_class(self):
+        return self.schema.set_class
+
+    @property
+    def _init_fields(self):
+        return self.schema._init_fields
+
+    @property
     def schema(self):
         """property to get the real schema"""
-        return self.generate_marsmallow_instance()
+        registry = self.context.get('registry', self.registry)
+        required_fields = self.context.get(
+            'required_fields', self.required_fields)
+        model = self.context.get('model', self.model)
+        only_primary_key = self.context.get(
+            'only_primary_key', self.only_primary_key)
+
+        if required_fields is None:
+            required_fields = []
+        if required_fields is True:
+            required_fields = [True]
+
+        return self.generate_marsmallow_instance(
+            registry, model, only_primary_key, *required_fields
+        )
 
     @update_from_kwargs('registry', 'only_primary_key', 'model', 'instances',
                         'required_fields')
