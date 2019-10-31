@@ -3,20 +3,30 @@ dist: xenial
 sudo: false
 
 python:
-  - "3.4"
-  - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
   - "3.7-dev" # 3.7 development branch
   - "3.8-dev" # 3.8 development branch
   - "nightly"
 
+env:
+  global:
+    - ANYBLOK_DATABASE_NAME=travis_ci_test
+    - ANYBLOK_DATABASE_DRIVER=postgresql
+    - ANYBLOK_DATABASE_USER=postgres
+    - SQLPYCLIENT='psycopg2-binary'
+
 
 matrix:
+  include:
+      - python: "pypy3.5"
+        env: ANYBLOK_DATABASE_DRIVER=postgresql+psycopg2cffi SQLPYCLIENT='psycopg2cffi'
   allow_failures:
       - python: "3.7-dev"
       - python: "3.8-dev"
       - python: "nightly"
+      - python: "pypy3.5"
 
 virtualenv:
   system_site_packages: false
@@ -27,22 +37,15 @@ services:
 install:
   - pip install -U pip
   - pip install wheel
-  - pip install psycopg2-binary sqlalchemy  # for unittesting anyblok with postgres
-  - pip install marshmallow --pre
-  - pip install -U flake8 coverage pytest pytest-cov
+  - pip install sqlalchemy $SQLPYCLIENT
+  - pip install -U flake8 pytest pytest-cov
   - pip install -U colour passlib furl phonenumbers pycountry  # special columns
   - pip install coveralls
   - pip install -e .
 
-env:
-  global:
-    - ANYBLOK_DATABASE_NAME=travis_ci_test
-    - ANYBLOK_DATABASE_DRIVER=postgresql
-    - ANYBLOK_DATABASE_USER=postgres
-
 script:
   - flake8 anyblok_marshmallow
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -c 'create database travis_ci_test;'
   - py.test --cov-report= --cov=anyblok_marshmallow anyblok_marshmallow/tests
   
 after_success:

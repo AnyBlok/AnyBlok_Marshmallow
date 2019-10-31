@@ -38,8 +38,8 @@ with open(
 
 requirements = [
     'anyblok',
-    'marshmallow==3.0.3',
-    'marshmallow-sqlalchemy',
+    'marshmallow>=3.2.1',
+    'marshmallow-sqlalchemy>=0.19.0',
 ]
 
 setup(
@@ -56,12 +56,14 @@ setup(
     zip_safe=False,
     keywords='anyblok_marshmallow',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
     ],
