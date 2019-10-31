@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 from os.path import abspath, dirname, join
 
 
-version = "2.2.3"
+version = "2.2.4"
 here = abspath(dirname(__file__))
 
 with open(join(here, 'README.rst'), 'r',
@@ -38,7 +38,7 @@ with open(
 
 requirements = [
     'anyblok',
-    'marshmallow==3.0.0rc5',
+    'marshmallow==3.0.3',
     'marshmallow-sqlalchemy',
 ]
 
@@ -60,8 +60,6 @@ setup(
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
