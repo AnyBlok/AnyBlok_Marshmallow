@@ -1576,6 +1576,130 @@ class TestFieldCountry:
             {'country': ['Not a valid country.']}
         )
 
+    def test_country_alpha_2_mode(self):
+
+        # Define some schema to test Country Field configuration
+        class ExampleCountrySchema(Schema):
+            country = fields.Country(mode=fields.Country.Modes.ALPHA_2)
+
+        sch = ExampleCountrySchema()
+
+        country = sch.load(dict(country='FR'))
+
+        assert isinstance(
+                country.get('country'), type(
+                    pycountry.countries.get(alpha_3='FRA')))
+        assert country.get('country') == pycountry.countries.get(
+                alpha_3='FRA')
+
+        country = sch.dump(country)
+
+        assert isinstance(country, dict)
+        assert country == {
+                'country': 'FR'
+                }
+
+    def test_country_numeric_mode(self):
+
+        # Define some schema to test Country Field configuration
+        class ExampleCountrySchema(Schema):
+            country = fields.Country(mode=fields.Country.Modes.NUMERIC)
+
+        sch = ExampleCountrySchema()
+
+        country = sch.load(dict(country='250'))
+
+        assert isinstance(
+                country.get('country'), type(
+                    pycountry.countries.get(alpha_3='FRA')))
+        assert country.get('country') == pycountry.countries.get(
+                alpha_3='FRA')
+
+        country = sch.dump(country)
+
+        assert isinstance(country, dict)
+        assert country == {
+                'country': '250'
+                }
+
+    def test_country_name_mode(self):
+
+        # Define some schema to test Country Field configuration
+        class ExampleCountrySchema(Schema):
+            country = fields.Country(mode=fields.Country.Modes.NAME)
+
+        sch = ExampleCountrySchema()
+
+        country = sch.load(dict(country='France'))
+
+        assert isinstance(
+                country.get('country'), type(
+                    pycountry.countries.get(alpha_3='FRA')))
+        assert country.get('country') == pycountry.countries.get(
+                alpha_3='FRA')
+
+        country = sch.dump(country)
+
+        assert isinstance(country, dict)
+        assert country == {
+                'country': 'France'
+                }
+
+    def test_country_official_name_mode(self):
+
+        # Define some schema to test Country Field configuration
+        class ExampleCountrySchema(Schema):
+            country = fields.Country(mode=fields.Country.Modes.OFFICIAL_NAME)
+
+        sch = ExampleCountrySchema()
+
+        country = sch.load(dict(country='French Republic'))
+
+        assert isinstance(
+                country.get('country'), type(
+                    pycountry.countries.get(alpha_3='FRA')))
+        assert country.get('country') == pycountry.countries.get(
+                alpha_3='FRA')
+
+        country = sch.dump(country)
+
+        assert isinstance(country, dict)
+        assert country == {
+                'country': 'French Republic'
+                }
+
+    def test_country_unknown_mode(self):
+
+        with pytest.raises(ValueError) as exception:
+            # Define some schema to test Country Field configuration
+            class ExampleCountrySchema(Schema):
+                country = fields.Country(mode="not_a_valid_mode")
+
+        assert str(
+                list(
+                    fields.Country.Modes.__members__.keys()
+                    )
+                ) in str(exception.value)
+
+    def test_country_different_load_and_dump_mode(self):
+
+        # Define some schema to test Country Field configuration
+        class ExampleCountrySchema(Schema):
+            country = fields.Country(
+                    load_mode=fields.Country.Modes.ALPHA_3,
+                    dump_mode=fields.Country.Modes.ALPHA_2
+                    )
+
+        sch = ExampleCountrySchema()
+
+        country = sch.load(dict(country='FRA'))
+        assert country.get('country') == pycountry.countries.get(alpha_3='FRA')
+
+        country = sch.dump(country)
+        assert country == {
+                'country': 'FR'
+                }
+
 
 def add_field_color():
 

@@ -13,6 +13,12 @@
 CHANGELOG
 =========
 
+2.3.1 (Unreleased)
+------------------
+
+* Improved Country field to add parametrization. Allowed modes are alpha 3, alpha 2,
+  numeric, name and official name.
+
 2.3.0 (2019-10-31)
 ------------------
 

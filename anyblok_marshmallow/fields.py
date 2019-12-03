@@ -1,6 +1,7 @@
 # This file is a part of the AnyBlok / Marshmallow api project
 #
 #    Copyright (C) 2017 Jean-Sebastien SUZANNE <jssuzanne@anybox.fr>
+#    Copyright (C) 2019 Alexis Tourneux <alexis.tourneux@gmail.com>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file,You can
@@ -10,6 +11,7 @@ from marshmallow.base import FieldABC
 from marshmallow.validate import OneOf
 from base64 import b64encode, b64decode
 from sqlalchemy_utils import PhoneNumber as PN
+from enum import Enum, unique
 from marshmallow.fields import (  # noqa
     Field,
     Raw,
@@ -210,16 +212,57 @@ class PhoneNumber(String):
 
 class Country(String):
 
-    def _serialize(self, value, attr, obj):
-        if value is not None and not isinstance(value, str):
-            return value.alpha_3
+    @unique
+    class Modes(Enum):
+        ALPHA_3 = 'alpha_3'
+        ALPHA_2 = 'alpha_2'
+        NUMERIC = 'numeric'
+        NAME = 'name'
+        OFFICIAL_NAME = 'official_name'
 
-        return value
+    def __init__(
+            self, mode=None, load_mode=Modes.ALPHA_3, dump_mode=Modes.ALPHA_3,
+            *args, **kwargs
+            ):
+
+        self.load_mode = mode or load_mode
+        self.dump_mode = mode or dump_mode
+
+        if (self.load_mode not in Country.Modes.__members__.values() or
+                self.dump_mode not in Country.Modes.__members__.values()):
+            raise ValueError(
+                    ("Provided modes do not match authorized values. Must be "
+                     "one of '%r'." % list(
+                         Country.Modes.__members__.keys())
+                     )
+                    )
+
+        super(Country, self).__init__(*args, **kwargs)
+
+    def _serialize(self, value, attr, obj):
+
+        if value is not None and not isinstance(value, str):
+            return getattr(value, self.dump_mode.value) or value
 
     def _deserialize(self, value, attr, data, **kwargs):
+
         if value is not None:
+
             import pycountry
-            value = pycountry.countries.get(alpha_3=value)
+
+            if self.load_mode == Country.Modes.ALPHA_3:
+                value = pycountry.countries.get(alpha_3=value)
+            elif self.load_mode == Country.Modes.ALPHA_2:
+                value = pycountry.countries.get(alpha_2=value)
+            elif self.load_mode == Country.Modes.NUMERIC:
+                value = pycountry.countries.get(numeric=value)
+            elif self.load_mode == Country.Modes.NAME:
+                value = pycountry.countries.get(name=value)
+            elif self.load_mode == Country.Modes.OFFICIAL_NAME:
+                value = pycountry.countries.get(official_name=value)
+            else:
+                value = None
+
             if value is None:
                 raise ValidationError('Not a valid country.')
 
